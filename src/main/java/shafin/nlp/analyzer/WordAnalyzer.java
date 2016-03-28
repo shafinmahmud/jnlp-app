@@ -83,18 +83,19 @@ public class WordAnalyzer {
 	
 	public static void main(String[] args) throws IOException {
 		
-		String loc = "D:/home/corpus/ratul_json/";
+		String loc = "D:/home/corpus/test/sample/";
 		WordAnalyzer wordAnalyzer = new WordAnalyzer(loc);
 		
 		Map<String, Integer> map =  wordAnalyzer.getUniqueWordsWithFrequency();
 		
 		StringBuilder sBuilder = new StringBuilder();
 		for(String word : map.keySet()){
-			sBuilder.append(word).append(" : ").append(map.get(word)).append("\n");
+			sBuilder.append(word+"\n");
+			//sBuilder.append(word).append(" : ").append(map.get(word)).append("\n");
 		}
 		
-		System.out.println(wordAnalyzer.countStopWordOccurence(map));
-		//FileHandler.writeFile(loc + "freq-terms.txt",sBuilder.toString());
+		//System.out.println(wordAnalyzer.countStopWordOccurence(map));
+		FileHandler.writeFile(loc + "manual_freq-terms.txt",sBuilder.toString());
 	}
 
 }

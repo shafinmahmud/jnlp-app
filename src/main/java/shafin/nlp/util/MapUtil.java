@@ -43,25 +43,20 @@ public class MapUtil {
 		return result;
 	}
 
-	public static <K, Double> Map<K, Double> normalizeMapValue(Map<K, Double> map) {
-		
-		Double maxVal = 0;
+	public static <K> Map<K, Double> normalizeMapValue(Map<K, Double> map) {
+		Double maxVal = new Double(0);
 		for (Map.Entry<K, Double> entry : map.entrySet()) {
-			if (entry.getValue().c > maxVal) {
+			if (entry.getValue() > maxVal) {
 				maxVal = entry.getValue();
 			}
 		}
-		
-		
-		Map<K, Double> normalizedMap = new HashMap<>();
-		for(Map.Entry<K, Double> entry: map.entrySet()){
-			
-			double temp = (double)((double)entry.getValue()/maxValue);
-			Double normV = new Double() ;
-			
-			normalizedMap.put(entry.getKey(), normV); 
-		}
 
+		Map<K, Double> normalizedMap = new HashMap<>();
+		for (Map.Entry<K, Double> entry : map.entrySet()) {
+			Double normVal = new Double((double) (entry.getValue() / maxVal));
+			normalizedMap.put(entry.getKey(), normVal);
+		}
+		return normalizedMap;
 	}
 
 	public static <K, V> Entry<K, V> findFirstKeyAssociatedMaxValue(Map<K, V> map) {
@@ -73,7 +68,7 @@ public class MapUtil {
 		}
 		return maxEntry;
 	}
-	
+
 	public static <K, V> Entry<K, V> findLastKeyAssociatedMaxValue(Map<K, V> map) {
 		Map.Entry<K, V> maxEntry = null;
 		for (Map.Entry<K, V> entry : map.entrySet()) {
@@ -90,5 +85,21 @@ public class MapUtil {
 			sum += map.get(key).intValue();
 		}
 		return sum;
+	}
+	
+	public static void main(String[] args) {
+		Map<String, Double> sampleMap = new LinkedHashMap<>();
+		sampleMap.put("eeni", 24.215);
+		sampleMap.put("meeni", 76.231);
+		sampleMap.put("miini", 100.00);
+		sampleMap.put("miiniCat", 100.00);
+		sampleMap.put("miiniCow", 100.00);
+		sampleMap.put("moh", 9.653);
+		
+		System.out.println(sampleMap);
+		System.out.println("first key assosicated max: " +findFirstKeyAssociatedMaxValue(sampleMap));
+		System.out.println("last key assosicated max: " +findLastKeyAssociatedMaxValue(sampleMap));
+		System.out.println("mormalized map: " +normalizeMapValue(sampleMap));
+		
 	}
 }
