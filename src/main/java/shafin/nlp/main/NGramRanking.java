@@ -11,6 +11,7 @@ import java.util.Map;
 import shafin.nlp.analyzer.NGramCandidate;
 import shafin.nlp.corpus.model.Document;
 import shafin.nlp.pfo.PhraseFirstOccurrenceHelper;
+import shafin.nlp.stemmer.StemmerHelper;
 import shafin.nlp.tfidf.TFIDFHelper;
 import shafin.nlp.tokenizer.SentenceTokenizer;
 import shafin.nlp.util.FileHandler;
@@ -60,11 +61,12 @@ public class NGramRanking {
 				 * remove candidates having stop-words at the beginning and
 				 * ending.
 				 */
-				NGramCandidate nCandidates = new NGramCandidate(text);
-				List<String> candidates = nCandidates.getNGramCandidateKeysFilteringSW(nGramMin, nGramMax);
-				COURPUS_PHRASE.add(candidates);
+				NGramCandidate nGram = new NGramCandidate(text);
+				List<String> fCandidates = nGram.getNGramCandidateKeysFilteringSW(nGramMin, nGramMax);
+				//List<String> sCandidates = StemmerHelper.getStemmedPhraseList(fCandidates);
+				COURPUS_PHRASE.add(fCandidates);
 
-				System.out.print("sentence: " + sentenceTokens.size() + " candidates: " + candidates.size() + " ");
+				System.out.print("sentence: " + sentenceTokens.size() + " candidates: " + fCandidates.size() + " ");
 			}
 		}
 		this.SENTENCE_FREQUENCY = numberOfSenctence / numberOfDocument;
@@ -87,20 +89,43 @@ public class NGramRanking {
 		return MapUtil.sortByValueDecending(pfoVector);
 	}
 
+	public Map<String, Double> combineFeatures(Map<String, Double> featureOne, Map<String, Double> featureTwo) {
+		Map<String, Double> combinedFeature = new HashMap<>();
+		for(Map.Entry<String, Double> featureOneEntry : featureOne.entrySet()){
+			Double comboValue = featureOneEntry.getValue()+featureTwo.get(featureOneEntry.getKey());
+			combinedFeature.put(featureOneEntry.getKey(), comboValue);
+		}
+		return MapUtil.normalizeMapValue(combinedFeature);
+	}
+	
+	
+	private void printKeyPhrases(Map<String, Double> scoreVector, int KPNumber){
+		int i = 1;
+		for(Map.Entry<String, Double> keyPhrases : scoreVector.entrySet()){
+			System.out.print("["+keyPhrases.getKey()+" : "+keyPhrases.getValue()+"]");
+			if(i == KPNumber)
+				break;
+			i++;
+		}
+	}
+	
 	public static void main(String[] args) throws IOException {
 
-		String filePath = "D:/home/corpus/test/sample/";
+		int docNum = 1;
+		String filePath = "D:/home/corpus/test/sample/economics/";
 		NGramRanking nGramRanking = new NGramRanking(filePath);
-		List<String> nTermDoc = nGramRanking.COURPUS_PHRASE.get(0);
-
-		/* scoring vector for each term of a document */
-		Map<String, List<Double>> featureVector = new HashMap<String, List<Double>>();
+		List<String> nTermDoc = nGramRanking.COURPUS_PHRASE.get(docNum);
 
 		/* generating TF-IDF score (S_TFIDF) for each candidate */
 		Map<String, Double> tfidfVector = nGramRanking.generateTFIDFfeature(nTermDoc, nGramRanking.COURPUS_PHRASE);
 		/* generating Phrase First Occurrence score (S_P) for each candidate */
-		Map<String, Double> pfoVector = nGramRanking.generatePFOfeature(nTermDoc, nGramRanking.COURPUS_TEXT.get(0));
-		System.out.println(tfidfVector);
+		Map<String, Double> pfoVector = nGramRanking.generatePFOfeature(nTermDoc, nGramRanking.COURPUS_TEXT.get(docNum));
+		/* ranking Key phrases combining both S_TFIDF and S_P for each candidate */
+		Map<String, Double> comboVector = nGramRanking.combineFeatures(tfidfVector, pfoVector);
+		
+		nGramRanking.printKeyPhrases(pfoVector,15);
+		
+		System.out.println("\n\n\n"+nGramRanking.COURPUS_TEXT.get(docNum));
 
 	}
 }

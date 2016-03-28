@@ -1,5 +1,6 @@
 package shafin.nlp.stemmer;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import shafin.nlp.util.FileHandler;
@@ -8,7 +9,7 @@ import shafin.nlp.util.FileHandler;
  * Hello world!
  *
  */
-public class App {
+public class StemmerHelper {
 	public static void main(String[] args) {
 		BnStemmerLight stemmerLight = new BnStemmerLight();
 		List<String> words = FileHandler
@@ -28,5 +29,15 @@ public class App {
 			}
 
 		}
+	}
+
+	public static List<String> getStemmedPhraseList(List<String> phraseList) {
+		List<String> stemmedList = new ArrayList<>();
+		BnStemmerLight stemmerLight = new BnStemmerLight();
+		for (String phrase : phraseList) {
+			String root = stemmerLight.stem(phrase);
+			stemmedList.add(root);
+		}
+		return stemmedList;
 	}
 }
