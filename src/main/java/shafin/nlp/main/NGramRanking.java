@@ -11,9 +11,9 @@ import java.util.Map;
 import shafin.nlp.analyzer.NGramCandidate;
 import shafin.nlp.corpus.model.Document;
 import shafin.nlp.pfo.PhraseFirstOccurrenceHelper;
-import shafin.nlp.stemmer.StemmerHelper;
 import shafin.nlp.tfidf.TFIDFHelper;
 import shafin.nlp.tokenizer.SentenceTokenizer;
+import shafin.nlp.util.FMeasure;
 import shafin.nlp.util.FileHandler;
 import shafin.nlp.util.JsonProcessor;
 import shafin.nlp.util.MapUtil;
@@ -22,14 +22,14 @@ public class NGramRanking {
 
 	private String CORPUS_LOC = "";
 	List<List<String>> COURPUS_PHRASE;
-	List<String> COURPUS_TEXT;
+	List<Document> COURPUS_DOC;
 
 	private double SENTENCE_FREQUENCY;
 
 	public NGramRanking(String coupusLoc) throws IOException {
 		this.CORPUS_LOC = coupusLoc;
 		this.COURPUS_PHRASE = new ArrayList<>();
-		this.COURPUS_TEXT = new ArrayList<>();
+		this.COURPUS_DOC = new ArrayList<Document>();
 		preprocessingCorpus(2, 3);
 		System.out.println("AVG sentence: " + SENTENCE_FREQUENCY);
 	}
@@ -49,7 +49,7 @@ public class NGramRanking {
 				JsonProcessor processor = new JsonProcessor(jsonFile);
 				Document doc = (Document) processor.convertToModel(Document.class);
 				String text = doc.getArticle();
-				COURPUS_TEXT.add(text);
+				COURPUS_DOC.add(doc);
 
 				/* sentence analysis */
 				List<String> sentenceTokens = SentenceTokenizer.getSentenceTokenListBn(text);
@@ -78,7 +78,7 @@ public class NGramRanking {
 		Map<String, Double> idfVector = TFIDFHelper.getIDFvector(corpusPhrase, nTermDoc);
 		Map<String, Double> tfidfVector = TFIDFHelper.getTFIDFvector(tfVector, idfVector);
 		tfidfVector = MapUtil.normalizeMapValue(tfidfVector);
-		return MapUtil.sortByValueDecending(tfidfVector);
+		return tfidfVector;
 	}
 
 	public Map<String, Double> generatePFOfeature(List<String> nTermDoc, String documentText) {
@@ -86,46 +86,56 @@ public class NGramRanking {
 		Map<String, Double> pfoVector = PhraseFirstOccurrenceHelper.getPhraseFirstOccurrenceVector(documentText,
 				nTermDoc);
 		pfoVector = MapUtil.normalizeMapValue(pfoVector);
-		return MapUtil.sortByValueDecending(pfoVector);
+		return pfoVector;
 	}
 
 	public Map<String, Double> combineFeatures(Map<String, Double> featureOne, Map<String, Double> featureTwo) {
 		Map<String, Double> combinedFeature = new HashMap<>();
-		for(Map.Entry<String, Double> featureOneEntry : featureOne.entrySet()){
-			Double comboValue = featureOneEntry.getValue()+featureTwo.get(featureOneEntry.getKey());
-			combinedFeature.put(featureOneEntry.getKey(), comboValue);
+		for(String phrase : featureOne.keySet()){
+			Double featureOneVal = featureOne.get(phrase);
+			Double featureTwoVal = featureTwo.get(phrase);
+			Double comboValue = featureOneVal+featureTwoVal;
+			combinedFeature.put(phrase, comboValue);
 		}
 		return MapUtil.normalizeMapValue(combinedFeature);
 	}
 	
 	
-	private void printKeyPhrases(Map<String, Double> scoreVector, int KPNumber){
+	private List<String> printKeyPhrases(Map<String, Double> scoreVector, int KPNumber){
 		int i = 1;
+		ArrayList<String> outputKP = new ArrayList<>();
+		System.out.println("\n\n");
 		for(Map.Entry<String, Double> keyPhrases : scoreVector.entrySet()){
-			System.out.print("["+keyPhrases.getKey()+" : "+keyPhrases.getValue()+"]");
+			String kp = keyPhrases.getKey();
+			outputKP.add(kp);
+			System.out.println("["+kp+" : "+keyPhrases.getValue()+"]");
 			if(i == KPNumber)
 				break;
 			i++;
 		}
+		return outputKP;
 	}
 	
 	public static void main(String[] args) throws IOException {
 
-		int docNum = 1;
-		String filePath = "D:/home/corpus/test/sample/economics/";
+		int docNum = 22;
+		String filePath = "D:/home/corpus/test/sample/";
 		NGramRanking nGramRanking = new NGramRanking(filePath);
 		List<String> nTermDoc = nGramRanking.COURPUS_PHRASE.get(docNum);
 
 		/* generating TF-IDF score (S_TFIDF) for each candidate */
 		Map<String, Double> tfidfVector = nGramRanking.generateTFIDFfeature(nTermDoc, nGramRanking.COURPUS_PHRASE);
 		/* generating Phrase First Occurrence score (S_P) for each candidate */
-		Map<String, Double> pfoVector = nGramRanking.generatePFOfeature(nTermDoc, nGramRanking.COURPUS_TEXT.get(docNum));
+		Map<String, Double> pfoVector = nGramRanking.generatePFOfeature(nTermDoc, nGramRanking.COURPUS_DOC.get(docNum).getArticle());
 		/* ranking Key phrases combining both S_TFIDF and S_P for each candidate */
 		Map<String, Double> comboVector = nGramRanking.combineFeatures(tfidfVector, pfoVector);
 		
-		nGramRanking.printKeyPhrases(pfoVector,15);
+		List<String> autoKP = nGramRanking.printKeyPhrases(MapUtil.sortByValueDecending(comboVector),15);
+		List<String> manualKP = nGramRanking.COURPUS_DOC.get(docNum).getManualKeyphrases();
 		
-		System.out.println("\n\n\n"+nGramRanking.COURPUS_TEXT.get(docNum));
-
+		System.out.println("\n"+nGramRanking.COURPUS_DOC.get(docNum).getArticle());
+		
+		System.out.println("\nprecison: "+FMeasure.generatePrecision(manualKP, autoKP));
+		System.out.println("recall: "+FMeasure.generateRecall(manualKP, autoKP));
 	}
 }
