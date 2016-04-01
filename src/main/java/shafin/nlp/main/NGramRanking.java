@@ -118,7 +118,7 @@ public class NGramRanking {
 	
 	public static void main(String[] args) throws IOException {
 
-		int docNum = 22;
+		int docNum = 24;
 		String filePath = "D:/home/corpus/test/sample/";
 		NGramRanking nGramRanking = new NGramRanking(filePath);
 		List<String> nTermDoc = nGramRanking.COURPUS_PHRASE.get(docNum);

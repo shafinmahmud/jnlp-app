@@ -42,6 +42,7 @@ public class VerbSuffixFilter {
 
 		if (Arrays.asList(VERB_SUFFIX_6).contains(sixthLastCharSubs)) {
 			return "6 " + token;
+			
 		} else if (Arrays.asList(VERB_SUFFIX_5).contains(fifthLastCharSubs)) {
 			return "5 " + token;
 		} else if (Arrays.asList(VERB_SUFFIX_4).contains(fourthLastCharSubs)) {
