@@ -8,9 +8,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import shafin.nlp.analyzer.NGramCandidate;
+import shafin.nlp.analyzer.VerbSuffixFilter;
 import shafin.nlp.corpus.model.Document;
 import shafin.nlp.pfo.PhraseFirstOccurrenceHelper;
+import shafin.nlp.stemmer.StemmerHelper;
 import shafin.nlp.tfidf.TFIDFHelper;
 import shafin.nlp.tokenizer.SentenceTokenizer;
 import shafin.nlp.util.FMeasure;
@@ -26,7 +29,7 @@ public class NGramRanking {
 
 	private double SENTENCE_FREQUENCY;
 
-	public NGramRanking(String coupusLoc) throws IOException {
+	public NGramRanking(String coupusLoc) throws IOException, ClassNotFoundException {
 		this.CORPUS_LOC = coupusLoc;
 		this.COURPUS_PHRASE = new ArrayList<>();
 		this.COURPUS_DOC = new ArrayList<Document>();
@@ -34,16 +37,20 @@ public class NGramRanking {
 		System.out.println("AVG sentence: " + SENTENCE_FREQUENCY);
 	}
 
-	private void preprocessingCorpus(int nGramMin, int nGramMax) throws IOException {
+	private void preprocessingCorpus(int nGramMin, int nGramMax) throws IOException, ClassNotFoundException {
 
 		int numberOfDocument = 0;
 		int numberOfSenctence = 0;
 
 		Iterator<String> fileIterator = FileHandler.getRecursiveFileList(CORPUS_LOC).iterator();
 
+		int i = 0;
+		
 		while (fileIterator.hasNext()) {
 			File jsonFile = new File(fileIterator.next());
-
+			
+			MaxentTagger tagger = new MaxentTagger("taggers/bengaliModelFile.tagger");
+			
 			if (jsonFile.getName().endsWith(".json")) {
 
 				JsonProcessor processor = new JsonProcessor(jsonFile);
@@ -62,11 +69,16 @@ public class NGramRanking {
 				 * ending.
 				 */
 				NGramCandidate nGram = new NGramCandidate(text);
-				List<String> fCandidates = nGram.getNGramCandidateKeysFilteringSW(nGramMin, nGramMax);
-				//List<String> sCandidates = StemmerHelper.getStemmedPhraseList(fCandidates);
+				List<String> candidates = nGram.getNGramCandidateKeysFilteringSW(nGramMin, nGramMax);
+				List<String> sCandidates = StemmerHelper.getStemmedPhraseList(candidates);
+				/*
+				 * remove candidates having verb-suffix at the beginning and
+				 * ending.
+				 */
+				List<String> fCandidates = VerbSuffixFilter.filterVerbSuffixCandidates(text, sCandidates, tagger);
 				COURPUS_PHRASE.add(fCandidates);
 
-				System.out.print("sentence: " + sentenceTokens.size() + " candidates: " + fCandidates.size() + " ");
+				System.out.println(i++ +" : "+jsonFile.getName()+" sentence: " + sentenceTokens.size() + " candidates: " + sCandidates.size() + " ");
 			}
 		}
 		this.SENTENCE_FREQUENCY = numberOfSenctence / numberOfDocument;
@@ -95,6 +107,8 @@ public class NGramRanking {
 			Double featureOneVal = featureOne.get(phrase);
 			Double featureTwoVal = featureTwo.get(phrase);
 			Double comboValue = featureOneVal+featureTwoVal;
+			
+			System.out.println(phrase+" : one>"+featureOneVal+" two>"+featureTwoVal+" combo>"+comboValue);
 			combinedFeature.put(phrase, comboValue);
 		}
 		return MapUtil.normalizeMapValue(combinedFeature);
@@ -116,10 +130,10 @@ public class NGramRanking {
 		return outputKP;
 	}
 	
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, ClassNotFoundException {
 
-		int docNum = 24;
-		String filePath = "D:/home/corpus/test/sample/";
+		int docNum = 8;
+		String filePath = "D:/home/corpus/test/sample/international/";
 		NGramRanking nGramRanking = new NGramRanking(filePath);
 		List<String> nTermDoc = nGramRanking.COURPUS_PHRASE.get(docNum);
 
@@ -129,6 +143,7 @@ public class NGramRanking {
 		Map<String, Double> pfoVector = nGramRanking.generatePFOfeature(nTermDoc, nGramRanking.COURPUS_DOC.get(docNum).getArticle());
 		/* ranking Key phrases combining both S_TFIDF and S_P for each candidate */
 		Map<String, Double> comboVector = nGramRanking.combineFeatures(tfidfVector, pfoVector);
+		
 		
 		List<String> autoKP = nGramRanking.printKeyPhrases(MapUtil.sortByValueDecending(comboVector),15);
 		List<String> manualKP = nGramRanking.COURPUS_DOC.get(docNum).getManualKeyphrases();

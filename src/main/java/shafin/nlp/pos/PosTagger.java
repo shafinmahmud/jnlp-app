@@ -58,12 +58,12 @@ public class PosTagger {
 		return filteredTokens;
 	}
 	
-	public static List<String> findVerbTaggedTokens(String text) throws ClassNotFoundException, IOException{
+	public static List<String> findVerbTaggedTokens(String text, MaxentTagger tagger) throws ClassNotFoundException, IOException{
 		List<String> tagList = new ArrayList<>();
 		tagList.add("/VM");
 		tagList.add("/VAUX");
 		
-		String taggedText = getPosTagged(text);
+		String taggedText = tagger.tagString(text);
 		
 		List<String> filteredTokens = new ArrayList<>();
 		List<String> taggedTokens = Arrays.asList(taggedText.split(" "));

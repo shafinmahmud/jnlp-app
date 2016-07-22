@@ -58,6 +58,6 @@ public class NGramCandidate {
 
 		for (String string : candiKeys) {
 			System.out.println(string);
-		}
+		}	
 	}
 }
