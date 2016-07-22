@@ -1,14 +1,14 @@
 package shafin.web.spider;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class UrlDB {
 
-	private Set<String> uniqueLinks;
+	private SortedSet<String> uniqueLinks;
 
 	public UrlDB() {
-		uniqueLinks = new HashSet<>();
+		uniqueLinks = new TreeSet<>();
 	}
 
 	public boolean isExists(String url) {

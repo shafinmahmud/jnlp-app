@@ -4,6 +4,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+import shafin.nlp.util.FileHandler;
+
 public class Spider {
 
 	public Queue<String> urlQueue;
@@ -18,22 +20,28 @@ public class Spider {
 
 	public void process(String seed) {
 		do {
-			this.extractor.setURL(seed);
-			List<String> urlList = this.extractor.extractURL();
+			try {
+				this.extractor.setURL(seed);
+				List<String> urlList = this.extractor.extractURL();
 
-			for (String url : urlList) {
-				if (!db.isExists(url)) {
-					urlQueue.add(url);
-					db.insert(url);
-					System.out.println(url);
+				for (String url : urlList) {
+					if (!db.isExists(url)) {
+						urlQueue.add(url);
+						db.insert(url);
+						System.out.println(url);
+						FileHandler.appendFile("D:/dw.txt", url+"\n");
+					}
 				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
+			
 			seed = urlQueue.poll();
 		} while (!urlQueue.isEmpty());
 	}
 	
 	public static void main(String[] args) {
-		Config config = new Config("\\.*");
+		Config config = new Config("\\/bn\\/\\.*");
 		Spider spider = new Spider(config);
 		spider.process("http://www.dw.com/bn/");
 	}

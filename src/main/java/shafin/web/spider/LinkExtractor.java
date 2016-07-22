@@ -17,8 +17,7 @@ public class LinkExtractor {
 	public LinkExtractor(Config config) {
 		this.DOMAIN_FILTER = config.getDOMAIN_FILTER_PATTERN();
 	}
-	
-	
+
 	public String getURL() {
 		return URL;
 	}
@@ -44,8 +43,13 @@ public class LinkExtractor {
 			List<String> urlList = new ArrayList<>();
 			for (Element e : links) {
 				String link = e.attr("href");
-				if (RegexUtil.containsPattern(link, DOMAIN_FILTER))
+				if (RegexUtil.containsPattern(link, DOMAIN_FILTER) && !link.contains("m.dw.com")) {
+					if (!link.startsWith("http://")) {
+						link = "http://www.dw.com" + link;
+					}
 					urlList.add(link);
+				}
+
 			}
 			return urlList;
 
