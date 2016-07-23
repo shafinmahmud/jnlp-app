@@ -1,4 +1,4 @@
-package shafin.web.spider;
+package shafin.nlp.util;
 
 import java.util.HashSet;
 import java.util.Set;

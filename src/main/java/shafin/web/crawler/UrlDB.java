@@ -1,4 +1,4 @@
-package shafin.web.spider;
+package shafin.web.crawler;
 
 import java.util.SortedSet;
 import java.util.TreeSet;

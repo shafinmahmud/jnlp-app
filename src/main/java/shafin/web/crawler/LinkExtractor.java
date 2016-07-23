@@ -1,4 +1,4 @@
-package shafin.web.spider;
+package shafin.web.crawler;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,6 +8,7 @@ import org.jsoup.Connection.Response;
 import org.jsoup.nodes.Element;
 
 import shafin.nlp.util.JsoupParser;
+import shafin.nlp.util.RegexUtil;
 
 public class LinkExtractor {
 
