@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 
+/* This is decided to use for articles from dw.com*/
 public class Document implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -24,6 +25,12 @@ public class Document implements Serializable {
 
 	@JsonProperty("title")
 	private String title;
+	
+	@JsonProperty("date")
+	private String date;
+	
+	@JsonProperty("writter")
+	private String writter;
 
 	@JsonProperty("categories")
 	private List<String> categories;
@@ -36,10 +43,6 @@ public class Document implements Serializable {
 
 	@JsonProperty("article")
 	private String article;
-
-	public Document() {
-		super();
-	}
 
 	public int getDocID() {
 		return docID;
@@ -81,6 +84,22 @@ public class Document implements Serializable {
 		this.title = title;
 	}
 
+	public String getDate() {
+		return date;
+	}
+
+	public void setDate(String date) {
+		this.date = date;
+	}
+
+	public String getWritter() {
+		return writter;
+	}
+
+	public void setWritter(String writter) {
+		this.writter = writter;
+	}
+
 	public List<String> getCategories() {
 		return categories;
 	}
@@ -113,12 +132,5 @@ public class Document implements Serializable {
 		this.article = article;
 	}
 
-	@Override
-	public String toString() {
-		return "Document [docID=" + docID + ", source=" + source + ", lang=" + lang + ", url=" + url + ", title="
-				+ title + ", categories=" + categories + ", manualKeyphrases=" + manualKeyphrases
-				+ ", automaticKeyphrases=" + automaticKeyphrases + ", article=" + article + "]";
-	}
-	
-	
+
 }
