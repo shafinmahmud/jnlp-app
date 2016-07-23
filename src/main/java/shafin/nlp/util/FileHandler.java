@@ -90,6 +90,12 @@ public class FileHandler {
 		StringBuilder sb = new StringBuilder();
 		BufferedReader in = null;
 		try {
+			
+			File file = new File(filePath);
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+					
 			in = new BufferedReader(new FileReader(filePath));
 
 			sb = new StringBuilder();

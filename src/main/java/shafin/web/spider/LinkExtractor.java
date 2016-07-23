@@ -11,11 +11,15 @@ import shafin.nlp.util.JsoupParser;
 
 public class LinkExtractor {
 
+	private final String DOMAIN;
 	private final String DOMAIN_FILTER;
+	private final List<String> EXCLUDE_STRINGS;
 	private String URL;
 
 	public LinkExtractor(Config config) {
 		this.DOMAIN_FILTER = config.getDOMAIN_FILTER_PATTERN();
+		this.DOMAIN = config.getROOT_DOMAIN();
+		this.EXCLUDE_STRINGS = config.getEXCLUDE_STRINGS();
 	}
 
 	public String getURL() {
@@ -36,6 +40,14 @@ public class LinkExtractor {
 		return null;
 	}
 
+	private boolean excludeFilter(String url) {
+		for (String e : this.EXCLUDE_STRINGS) {
+			if (url.contains(e))
+				return false;
+		}
+		return true;
+	}
+
 	public List<String> extractURL() {
 		Response response = getHTMLFromURL();
 		try {
@@ -43,13 +55,16 @@ public class LinkExtractor {
 			List<String> urlList = new ArrayList<>();
 			for (Element e : links) {
 				String link = e.attr("href");
-				if (RegexUtil.containsPattern(link, DOMAIN_FILTER) && !link.contains("m.dw.com")) {
-					if (!link.startsWith("http://")) {
-						link = "http://www.dw.com" + link;
+				if (RegexUtil.containsPattern(link, DOMAIN_FILTER)) {
+					if (excludeFilter(link)) {
+						if (!link.startsWith("http://")) {
+							link = DOMAIN + link;
+						}
+						if (link.startsWith(DOMAIN)) {
+							urlList.add(link);
+						}
 					}
-					urlList.add(link);
 				}
-
 			}
 			return urlList;
 
