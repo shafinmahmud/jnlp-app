@@ -48,11 +48,12 @@ public class LinkExtractor {
 		return true;
 	}
 
-	public List<String> extractURL() {
+	public List<String> extractURL() throws IOException {
 		Response response = getHTMLFromURL();
-		try {
+		List<String> urlList = new ArrayList<>();
+		if (response != null) {
 			List<Element> links = response.parse().select("a");
-			List<String> urlList = new ArrayList<>();
+
 			for (Element e : links) {
 				String link = e.attr("href");
 				if (RegexUtil.containsPattern(link, DOMAIN_FILTER)) {
@@ -66,11 +67,7 @@ public class LinkExtractor {
 					}
 				}
 			}
-			return urlList;
-
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
-		return null;
+		return urlList;
 	}
 }

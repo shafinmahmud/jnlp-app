@@ -1,10 +1,14 @@
 package shafin.web.spider;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+
+import org.jsoup.HttpStatusException;
 
 import shafin.nlp.util.FileHandler;
 
@@ -47,33 +51,38 @@ public class Spider {
 		}
 	}
 
-	public void process(String seed) {
+	public void process(String seed) throws IOException {
 
 		loadStoredLinksInQueue();
+		try {
+			do {
+				try {
+					this.extractor.setURL(seed);
+					List<String> urlList = this.extractor.extractURL();
 
-		do {
-			try {
-				this.extractor.setURL(seed);
-				List<String> urlList = this.extractor.extractURL();
-
-				for (String url : urlList) {
-					if (!db.isExists(url)) {
-						urlQueue.add(url);
-						db.insert(url);
-						System.out.println("INSERTING: " + ++counter + " Q[" + this.urlQueue.size() + "] " + url);
-						FileHandler.appendFile(FILE_PATH, url + "\n");
+					for (String url : urlList) {
+						if (!db.isExists(url)) {
+							urlQueue.add(url);
+							db.insert(url);
+							System.out.println("INSERTING: " + ++counter + " Q[" + this.urlQueue.size() + "] " + url);
+							FileHandler.appendFile(FILE_PATH, url + "\n");
+						} else {
+							//System.out.println("EXISTING: " + counter + " Q[" + this.urlQueue.size() + "] " + url);
+						}
 					}
+				} catch (HttpStatusException e) {
+					e.printStackTrace();
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-			seed = urlQueue.poll();
-			FileHandler.writeFile(HISTORY_PATH, seed);
-		} while (!urlQueue.isEmpty());
+				
+				seed = urlQueue.poll();
+				FileHandler.writeFile(HISTORY_PATH, seed);
+			} while (!urlQueue.isEmpty());
+		} catch (UnknownHostException | NullPointerException  e) {
+			e.printStackTrace();
+		}
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		String DOMAIN = "http://www.dw.com";
 		String FILTER = "\\/bn\\/\\.*";
 		List<String> excludeStrings = new ArrayList<>();
