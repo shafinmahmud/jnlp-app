@@ -15,8 +15,10 @@ import shafin.nlp.util.FileHandler;
 public class Spider {
 
 	public String FOLDER_PATH = "D:/home/dw/";
+	public String HOTLINK_PATH = FOLDER_PATH + "dw.hot";
 	public String HISTORY_PATH = FOLDER_PATH + "dw.q";
-	public String FILE_PATH = FOLDER_PATH + "dw.txt";
+	public String STORAGE_PATH = FOLDER_PATH + "dw.txt";
+	
 	public Queue<String> urlQueue;
 	public LinkExtractor extractor;
 	public UrlDB db;
@@ -30,12 +32,17 @@ public class Spider {
 	}
 
 	private void loadStoredLinksInQueue() {
-		File file = new File(FILE_PATH);
+		File file = new File(STORAGE_PATH);	
+		List<String> hotLinks = FileHandler.readFile(HOTLINK_PATH);
 		String queueHead = FileHandler.readFileAsSingleString(HISTORY_PATH);
 		boolean headFound = false;
 
 		if (file.exists()) {
-			List<String> list = FileHandler.readFile(FILE_PATH);
+			for(String hot : hotLinks){
+				this.urlQueue.add(hot);
+			}
+			
+			List<String> list = FileHandler.readFile(STORAGE_PATH);
 			for (String l : list) {
 				this.db.insert(l);
 
@@ -65,7 +72,7 @@ public class Spider {
 							urlQueue.add(url);
 							db.insert(url);
 							System.out.println("INSERTING: " + ++counter + " Q[" + this.urlQueue.size() + "] " + url);
-							FileHandler.appendFile(FILE_PATH, url + "\n");
+							FileHandler.appendFile(STORAGE_PATH, url + "\n");
 						} else {
 							//System.out.println("EXISTING: " + counter + " Q[" + this.urlQueue.size() + "] " + url);
 						}
@@ -88,6 +95,7 @@ public class Spider {
 		List<String> excludeStrings = new ArrayList<>();
 		excludeStrings.add("m.dw.com");
 		excludeStrings.add("/search/");
+		excludeStrings.add("/মিডিয়া-সেন্টার/মাল্টিমিডিয়া/");
 
 		Config config = new Config(DOMAIN, FILTER, excludeStrings);
 
