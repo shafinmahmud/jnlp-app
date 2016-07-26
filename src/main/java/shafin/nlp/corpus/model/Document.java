@@ -25,10 +25,10 @@ public class Document implements Serializable {
 
 	@JsonProperty("title")
 	private String title;
-	
+
 	@JsonProperty("date")
 	private String date;
-	
+
 	@JsonProperty("writter")
 	private String writter;
 
@@ -37,9 +37,9 @@ public class Document implements Serializable {
 
 	@JsonProperty("manualKeyPhrases")
 	private List<String> manualKeyphrases;
-	
+
 	@JsonProperty("automaticKeyPhrases")
-	private Map<String, List<String>> automaticKeyphrases;
+	private List<String> automaticKeyphrases;
 
 	@JsonProperty("article")
 	private String article;
@@ -116,11 +116,11 @@ public class Document implements Serializable {
 		this.manualKeyphrases = manualKeyphrases;
 	}
 
-	public Map<String, List<String>> getAutomaticKeyphrases() {
+	public List<String> getAutomaticKeyphrases() {
 		return automaticKeyphrases;
 	}
 
-	public void setAutomaticKeyphrases(Map<String, List<String>> automaticKeyphrases) {
+	public void setAutomaticKeyphrases(List<String> automaticKeyphrases) {
 		this.automaticKeyphrases = automaticKeyphrases;
 	}
 
@@ -132,5 +132,12 @@ public class Document implements Serializable {
 		this.article = article;
 	}
 
+	@Override
+	public String toString() {
+		return "docID : " + docID + "\nsource : " + source + "\nlang : " + lang + "\n url : " + url + "\ntitle : "
+				+ title + "\ndate : " + date + "\nwritter : " + writter + "\ncategories : " + categories
+				+ "\nmanualKeyphrases : " + manualKeyphrases.toString() + "\nautomaticKeyphrases : "
+				+ automaticKeyphrases.toString() + "\narticle : " + article;
+	}
 
 }

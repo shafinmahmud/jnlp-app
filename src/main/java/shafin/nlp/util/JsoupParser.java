@@ -51,7 +51,8 @@ public class JsoupParser {
 	}
 
 	public Response getResponseFromGetRequest(String url) throws IOException, MalformedURLException {
-		Response response = Jsoup.connect(url).userAgent(USER_AGENT).followRedirects(false).timeout(TIME_OUT_VALUE)
+		Response response = Jsoup.connect(url)
+					.userAgent(USER_AGENT).followRedirects(false).timeout(TIME_OUT_VALUE)
 				.execute();
 		return response;
 	}
@@ -162,6 +163,13 @@ public class JsoupParser {
 		return doc.html();
 	}
 
+	public static Element removeElement(Element contentElement, String removingElementCSS){
+		for(Element element : contentElement.select(removingElementCSS)){
+			element.remove();
+		}
+		return contentElement;
+	}
+	
 	private static void removeComments(Node node) {
 		
 		for (int i = 0; i < node.childNodes().size();) {

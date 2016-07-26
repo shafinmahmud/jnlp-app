@@ -45,7 +45,7 @@ public class TextToJsonCourpus {
 
 				d.setManualKeyphrases(new ArrayList<String>());
 
-				HashMap<String, List<String>> autoKeypharases = new HashMap<>();
+				List<String> autoKeypharases = new ArrayList<>();
 				d.setAutomaticKeyphrases(autoKeypharases);
 
 				JsonProcessor jsonProcessor = new JsonProcessor();
