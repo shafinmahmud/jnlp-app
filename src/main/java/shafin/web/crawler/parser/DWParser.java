@@ -1,7 +1,9 @@
 package shafin.web.crawler.parser;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,10 +26,8 @@ public class DWParser implements DocumentParser{
 	public DWParser(String url) throws MalformedURLException, IOException {
 		this.URL = url;
 		this.parser = new JsoupParser();
-		url = URLEncoder.encode(url, "UTF-8");
-		System.out.println(url);
-		this.HTML = parser.getResponseFromGetRequest(this.URL).parse().html();
-		System.out.println(HTML);
+		url = encodeURL(url);
+		this.HTML = parser.getResponseFromGetRequest(url).parse().html();
 	}
 	
 	@Override
@@ -81,8 +81,8 @@ public class DWParser implements DocumentParser{
 	@Override
 	public List<String> parseCategories() {
 		try {
-			Element cat = parser.parseElementByFirstFromHtml(this.HTML, "#bodyContent .artikel");
-			String[] arr = cat.parent().text().split(",");
+			Element cat = parser.parseElementByFirstFromHtml(this.HTML, "#bodyContent h4.artikel");
+			String[] arr = cat.text().split(",");
 			return Arrays.asList(arr);
 		} catch (NullPointerException e) {
 			return  new ArrayList<>();
@@ -94,7 +94,7 @@ public class DWParser implements DocumentParser{
 		//  #bodyContent li>strong:contains(কি-ওয়ার্ডস) -- > then parent  
 		try {
 			Element kws = parser.parseElementByFirstFromHtml(this.HTML, "#bodyContent li>strong:contains(কি-ওয়ার্ডস)");
-			String[] arr = kws.parent().text().split(",");
+			String[] arr = kws.parent().text().replaceAll("কি-ওয়ার্ডস", "").split(",");
 			return Arrays.asList(arr);
 		} catch (NullPointerException e) {
 			return  new ArrayList<>();
@@ -136,10 +136,32 @@ public class DWParser implements DocumentParser{
 		return document;
 	}
 	
-	public static void main(String[] args) {
+	
+	public static String encodeURL(String url){
+	    try {
+	       String result = URLEncoder.encode(url, "UTF-8")
+	    		   	.replaceAll("\\%3A", ":")
+	    		   	.replaceAll("\\%2F", "/")
+	    		   	.replaceAll("\\%26", "&")
+	                .replaceAll("\\+", "%20")
+	                .replaceAll("\\%21", "!")
+	                .replaceAll("\\%27", "'")
+	                .replaceAll("\\%28", "(")
+	                .replaceAll("\\%29", ")")
+	                .replaceAll("\\%7E", "~");
+	       return result;
+	    } catch (UnsupportedEncodingException e) {
+	    	e.printStackTrace();
+	        return url;
+	    }
+	}
+	
+	public static void main(String[] args) throws URISyntaxException {
 		DWParser parser;
 		try {
-			parser = new DWParser("http://www.dw.com/bn/পাকিস্তানে-হিন্দু-বিবাহ-আইন-আসতে-চলেছে/a-19077525");
+			String url = "http://www.dw.com/bn/একশ-ইউরোতে-চিড়িয়াখানায়-রাত-কাটানোর-সুযোগ/a-4583689";
+			
+			parser = new DWParser(url);
 			String txt = parser.getParsedDocument().toString();
 			System.out.println(txt);
 		} catch (IOException e) {

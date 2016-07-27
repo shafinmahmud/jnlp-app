@@ -16,8 +16,8 @@ public class Spider {
 
 	public String FOLDER_PATH = "D:/home/dw/";
 	public String HOTLINK_PATH = FOLDER_PATH + "dw.hot";
-	public String HISTORY_PATH = FOLDER_PATH + "dw.q";
-	public String STORAGE_PATH = FOLDER_PATH + "dw.txt";
+	public String HISTORY_PATH = FOLDER_PATH + "dwtest.q";
+	public String STORAGE_PATH = FOLDER_PATH + "dwtest.txt";
 	
 	public Queue<String> urlQueue;
 	public LinkExtractor extractor;

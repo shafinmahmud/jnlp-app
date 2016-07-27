@@ -1,6 +1,8 @@
 package shafin.web.crawler;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +36,7 @@ public class LinkExtractor {
 	private Response getHTMLFromURL() {
 		try {
 			JsoupParser jsoupParser = new JsoupParser();
-			return jsoupParser.getRedirectedResponseFromGetRequest(this.URL);
+			return jsoupParser.getRedirectedResponseFromGetRequest(encodeURL(this.URL));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -70,5 +72,24 @@ public class LinkExtractor {
 			}
 		}
 		return urlList;
+	}
+	
+	public static String encodeURL(String url){
+	    try {
+	       String result = URLEncoder.encode(url, "UTF-8")
+	    		   	.replaceAll("\\%3A", ":")
+	    		   	.replaceAll("\\%2F", "/")
+	    		   	.replaceAll("\\%26", "&")
+	                .replaceAll("\\+", "%20")
+	                .replaceAll("\\%21", "!")
+	                .replaceAll("\\%27", "'")
+	                .replaceAll("\\%28", "(")
+	                .replaceAll("\\%29", ")")
+	                .replaceAll("\\%7E", "~");
+	       return result;
+	    } catch (UnsupportedEncodingException e) {
+	    	e.printStackTrace();
+	        return url;
+	    }
 	}
 }

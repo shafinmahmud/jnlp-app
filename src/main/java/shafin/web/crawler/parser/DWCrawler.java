@@ -11,7 +11,7 @@ public class DWCrawler {
 
 	public String FOLDER_PATH = "D:/home/dw/";
 	public String URL_LIST_FILE_PATH = FOLDER_PATH + "";
-	public String STORAGE_FOLDER_PATH = FOLDER_PATH + "/data/";
+	public String STORAGE_FOLDER_PATH = FOLDER_PATH + "data/";
 
 	public List<String> urlList;
 
@@ -26,7 +26,7 @@ public class DWCrawler {
 		for (String url : this.urlList) {
 			try {
 				Document doc = parseDocument(url);
-				System.out.println(doc.toString());
+
 				if (!doc.getManualKeyphrases().isEmpty()) {
 					FileHandler.writeFile(STORAGE_FOLDER_PATH + counter++ + ". " + doc.getTitle() + ".txt",
 							doc.toString());
