@@ -3,7 +3,6 @@ package shafin.web.crawler;
 import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -14,34 +13,39 @@ import shafin.nlp.util.FileHandler;
 
 public class Spider {
 
-	public String FOLDER_PATH = "D:/home/dw/";
-	public String HOTLINK_PATH = FOLDER_PATH + "dw.hot";
-	public String HISTORY_PATH = FOLDER_PATH + "dwtest.q";
-	public String STORAGE_PATH = FOLDER_PATH + "dwtest.txt";
-	
+	public String HOTLINK_PATH;
+	public String HISTORY_PATH;
+	public String STORAGE_PATH;
+	public String FAILED_LINK_PATH;
+
 	public Queue<String> urlQueue;
 	public LinkExtractor extractor;
 	public UrlDB db;
 
 	private int counter;
 
-	public Spider(Config config) {
+	public Spider(SpiderConfig config) {
 		this.extractor = new LinkExtractor(config);
 		this.db = new UrlDB();
 		this.urlQueue = new LinkedList<>();
+		
+		this.HOTLINK_PATH = config.getHOTLINK_PATH();
+		this.HISTORY_PATH = config.getHISTORY_PATH();
+		this.STORAGE_PATH = config.getSTORAGE_PATH();
+		this.FAILED_LINK_PATH = config.getFAILED_LINK_PATH();		
 	}
 
 	private void loadStoredLinksInQueue() {
-		File file = new File(STORAGE_PATH);	
+		File file = new File(STORAGE_PATH);
 		List<String> hotLinks = FileHandler.readFile(HOTLINK_PATH);
 		String queueHead = FileHandler.readFileAsSingleString(HISTORY_PATH);
 		boolean headFound = false;
 
 		if (file.exists()) {
-			for(String hot : hotLinks){
+			for (String hot : hotLinks) {
 				this.urlQueue.add(hot);
 			}
-			
+
 			List<String> list = FileHandler.readFile(STORAGE_PATH);
 			for (String l : list) {
 				this.db.insert(l);
@@ -74,32 +78,21 @@ public class Spider {
 							System.out.println("INSERTING: " + ++counter + " Q[" + this.urlQueue.size() + "] " + url);
 							FileHandler.appendFile(STORAGE_PATH, url + "\n");
 						} else {
-							//System.out.println("EXISTING: " + counter + " Q[" + this.urlQueue.size() + "] " + url);
+							// System.out.println("EXISTING: " + counter + " Q["
+							// + this.urlQueue.size() + "] " + url);
 						}
 					}
 				} catch (HttpStatusException e) {
-					e.printStackTrace();
+					System.out.println("EXCEPTION : "+ e.getMessage());
+					FileHandler.appendFile(FAILED_LINK_PATH, seed + "\n");
 				}
-				
+
 				seed = urlQueue.poll();
 				FileHandler.writeFile(HISTORY_PATH, seed);
 			} while (!urlQueue.isEmpty());
-		} catch (UnknownHostException | NullPointerException  e) {
+		} catch (UnknownHostException | NullPointerException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public static void main(String[] args) throws IOException {
-		String DOMAIN = "http://www.dw.com";
-		String FILTER = "\\/bn\\/\\.*";
-		List<String> excludeStrings = new ArrayList<>();
-		excludeStrings.add("m.dw.com");
-		excludeStrings.add("/search/");
-		excludeStrings.add("/মিডিয়া-সেন্টার/মাল্টিমিডিয়া/");
-
-		Config config = new Config(DOMAIN, FILTER, excludeStrings);
-
-		Spider spider = new Spider(config);
-		spider.process("http://www.dw.com/bn/");
-	}
 }

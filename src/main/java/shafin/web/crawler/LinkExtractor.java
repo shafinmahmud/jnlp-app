@@ -19,7 +19,7 @@ public class LinkExtractor {
 	private final List<String> EXCLUDE_STRINGS;
 	private String URL;
 
-	public LinkExtractor(Config config) {
+	public LinkExtractor(SpiderConfig config) {
 		this.DOMAIN_FILTER = config.getDOMAIN_FILTER_PATTERN();
 		this.DOMAIN = config.getROOT_DOMAIN();
 		this.EXCLUDE_STRINGS = config.getEXCLUDE_STRINGS();
@@ -33,14 +33,9 @@ public class LinkExtractor {
 		URL = uRL;
 	}
 
-	private Response getHTMLFromURL() {
-		try {
-			JsoupParser jsoupParser = new JsoupParser();
-			return jsoupParser.getRedirectedResponseFromGetRequest(encodeURL(this.URL));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
+	private Response getHTMLFromURL() throws IOException {
+		JsoupParser jsoupParser = new JsoupParser();
+		return jsoupParser.getRedirectedResponseFromGetRequest(encodeURL(this.URL));
 	}
 
 	private boolean excludeFilter(String url) {
@@ -73,23 +68,16 @@ public class LinkExtractor {
 		}
 		return urlList;
 	}
-	
-	public static String encodeURL(String url){
-	    try {
-	       String result = URLEncoder.encode(url, "UTF-8")
-	    		   	.replaceAll("\\%3A", ":")
-	    		   	.replaceAll("\\%2F", "/")
-	    		   	.replaceAll("\\%26", "&")
-	                .replaceAll("\\+", "%20")
-	                .replaceAll("\\%21", "!")
-	                .replaceAll("\\%27", "'")
-	                .replaceAll("\\%28", "(")
-	                .replaceAll("\\%29", ")")
-	                .replaceAll("\\%7E", "~");
-	       return result;
-	    } catch (UnsupportedEncodingException e) {
-	    	e.printStackTrace();
-	        return url;
-	    }
+
+	public static String encodeURL(String url) {
+		try {
+			String result = URLEncoder.encode(url, "UTF-8").replaceAll("\\%3A", ":").replaceAll("\\%2F", "/")
+					.replaceAll("\\%26", "&").replaceAll("\\+", "%20").replaceAll("\\%21", "!").replaceAll("\\%27", "'")
+					.replaceAll("\\%28", "(").replaceAll("\\%29", ")").replaceAll("\\%7E", "~");
+			return result;
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			return url;
+		}
 	}
 }

@@ -7,7 +7,9 @@ import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.jsoup.nodes.Element;
 
@@ -95,7 +97,15 @@ public class DWParser implements DocumentParser{
 		try {
 			Element kws = parser.parseElementByFirstFromHtml(this.HTML, "#bodyContent li>strong:contains(কি-ওয়ার্ডস)");
 			String[] arr = kws.parent().text().replaceAll("কি-ওয়ার্ডস", "").split(",");
-			return Arrays.asList(arr);
+			
+			Set<String> kwSet = new HashSet<>();
+			for(String kw : arr){
+				kwSet.add(kw.trim());
+			}
+			
+			List<String> kwList = new ArrayList<>();
+			kwList.addAll(kwSet);
+			return kwList;
 		} catch (NullPointerException e) {
 			return  new ArrayList<>();
 		}
