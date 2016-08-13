@@ -1,4 +1,4 @@
-package shafin.web.crawler;
+package shafin.web.crawler.spider;
 
 import java.io.File;
 import java.io.IOException;

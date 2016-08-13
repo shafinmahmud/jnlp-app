@@ -2,6 +2,8 @@ package shafin.web.crawler.parser;
 
 import java.util.List;
 
+import shafin.nlp.corpus.model.Document;
+
 public interface DocumentParser {
 	
 	public String parseSource();
@@ -21,4 +23,6 @@ public interface DocumentParser {
 	public List<String> parseManualKeyphrases();
 	
 	public String parseArticle();
+	
+	public Document getParsedDocument();
 }

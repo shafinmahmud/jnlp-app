@@ -84,6 +84,40 @@ public class FileHandler {
 		}
 		return lines;
 	}
+	
+	public static List<String> readFileOrCreateIfNotExists(String filePath) {
+
+		List<String> lines = new ArrayList<>();
+		BufferedReader br = null;
+		String line = null;
+
+		try {
+			
+			File file = new File(filePath);
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+			
+			br = new BufferedReader(new FileReader(filePath));
+			while ((line = br.readLine()) != null) {
+				lines.add(line);
+			}
+			return lines;
+
+		} catch (FileNotFoundException e) {
+			System.out.println(filePath);
+			e.printStackTrace();
+		} catch (IOException e) {
+		} finally {
+			if (br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+				}
+			}
+		}
+		return lines;
+	}
 
 	public static String readFileAsSingleString(String filePath) {
 
@@ -189,6 +223,14 @@ public class FileHandler {
 		} catch (IOException e) {
 			return false;
 		}
+	}
+	
+	public static boolean deleteFile(String filePath){
+		File file = new File(filePath);
+		if(file.exists()){
+			return file.delete();
+		}
+		return false;
 	}
 
 	public static boolean validateFileName(String fileName) {

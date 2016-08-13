@@ -1,10 +1,13 @@
-package shafin.web.crawler;
+package shafin.web.crawler.home;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SpiderController {
+import shafin.web.crawler.spider.Spider;
+import shafin.web.crawler.spider.SpiderConfig;
+
+public class DWSpider {
 
 	public static void main(String[] args) throws IOException {
 
