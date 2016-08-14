@@ -35,9 +35,8 @@ public class FileHandler {
 	public static List<String> getRecursiveFileList(String path) throws IOException {
 		List<String> fileList = new ArrayList<>();
 
-			
-		class FileRecursion{		
-			private void listFilesForFolder(File folder) {				
+		class FileRecursion {
+			private void listFilesForFolder(File folder) {
 				for (File fileEntry : folder.listFiles()) {
 					if (fileEntry.isDirectory()) {
 						listFilesForFolder(fileEntry);
@@ -47,15 +46,13 @@ public class FileHandler {
 				}
 			}
 		}
-		
+
 		File folder = new File(path);
 		FileRecursion recursion = new FileRecursion();
 		recursion.listFilesForFolder(folder);
-		
+
 		return fileList;
 	}
-
-
 
 	public static List<String> readFile(String filePath) {
 
@@ -84,7 +81,7 @@ public class FileHandler {
 		}
 		return lines;
 	}
-	
+
 	public static List<String> readFileOrCreateIfNotExists(String filePath) {
 
 		List<String> lines = new ArrayList<>();
@@ -92,12 +89,12 @@ public class FileHandler {
 		String line = null;
 
 		try {
-			
+
 			File file = new File(filePath);
 			if (!file.exists()) {
 				file.createNewFile();
 			}
-			
+
 			br = new BufferedReader(new FileReader(filePath));
 			while ((line = br.readLine()) != null) {
 				lines.add(line);
@@ -124,12 +121,12 @@ public class FileHandler {
 		StringBuilder sb = new StringBuilder();
 		BufferedReader in = null;
 		try {
-			
+
 			File file = new File(filePath);
 			if (!file.exists()) {
 				file.createNewFile();
 			}
-					
+
 			in = new BufferedReader(new FileReader(filePath));
 
 			sb = new StringBuilder();
@@ -154,6 +151,7 @@ public class FileHandler {
 
 	public static boolean writeFile(String filePath, String textData) {
 		try {
+			filePath = validateFilePathName(filePath);
 			File file = new File(filePath);
 
 			if (!file.exists()) {
@@ -175,6 +173,7 @@ public class FileHandler {
 
 	public static boolean appendFile(String filePath, String textData) {
 		try {
+			filePath = validateFilePathName(filePath);
 			File file = new File(filePath);
 
 			// if file doesnt exists, then create it
@@ -198,6 +197,7 @@ public class FileHandler {
 
 	public static boolean writeListToFile(String filePath, List<String> inputList) {
 		try {
+			filePath = validateFilePathName(filePath);
 			File file = new File(filePath);
 
 			// if file doesnt exists, then create it
@@ -224,26 +224,31 @@ public class FileHandler {
 			return false;
 		}
 	}
-	
-	public static boolean deleteFile(String filePath){
+
+	public static boolean deleteFile(String filePath) {
 		File file = new File(filePath);
-		if(file.exists()){
+		if (file.exists()) {
 			return file.delete();
 		}
 		return false;
 	}
 
-	public static boolean validateFileName(String fileName) {
-		fileName = fileName.trim();
-		if (fileName.length() > 0) {
-			return fileName.matches("^[^.\\\\/:*?\"<>|]?[^\\\\/:*?\"<>|]*");
+	public static String validateFilePathName(String filePath) {
+		int idx = filePath.replaceAll("\\\\", "/").lastIndexOf("/");
+		if (idx >= 0) {
+			String fileName = filePath.substring(idx + 1);
+			String fileExtension = getFileExtensionFromPathString(filePath);
+			fileName = fileName.replace(fileExtension, "");
+			
+			String newFileName = getValidFileName(fileName);
+			return filePath.replace(fileName, newFileName);
 		} else {
-			throw new IllegalStateException("File Name " + fileName + " results in a empty fileName!");
+			return null;
 		}
 	}
 
 	public static String getValidFileName(String fileName) {
-		String newFileName = fileName.replaceAll("[.\\\\/:*?\"<>|]?[\\\\/:*?\"<>|]*", "");
+		String newFileName = fileName.replaceAll("[.\\\\/:*?\"<>|]?[\\\\/:*?\"<>|]*", "").trim();
 		if (newFileName.length() == 0) {
 			throw new IllegalStateException("File Name " + fileName + " results in a empty fileName!");
 		}
@@ -253,13 +258,38 @@ public class FileHandler {
 	public static String getFileNameFromPathString(String filePath) {
 		try {
 			int idx = filePath.replaceAll("\\\\", "/").lastIndexOf("/");
-			return idx >= 0 ? filePath.substring(idx + 1) : filePath;
+			if (idx >= 0) {
+				String fileName = filePath.substring(idx + 1);
+				String fileExtension = getFileExtensionFromPathString(filePath);
+				return fileName.replace(fileExtension, "");
+			}
+			return null;
 		} catch (Exception e) {
 			throw e;
 		}
 	}
-	
-	public static void main(String[] args){
-		
+
+	private static String getFileExtensionFromPathString(String filePath) {
+		try {
+			int idx = filePath.lastIndexOf(".");
+			if (idx >= 0) {
+				String extension = filePath.substring(idx);
+				return extension;
+			}
+			return null;
+		} catch (Exception e) {
+			throw e;
+		}
+	}
+
+	public static void main(String[] args) {
+		// তেলাপোকার দুধ: ভবিষ্যতের ‘সুপারফুড'?
+		// শিশু শরণার্থী: অপরাধীদের সহজ লক্ষ্য
+		// ২০১৬ অলিম্পিক: রিও কি প্রস্তুত?
+		String filePath = "D:/home/dw/data/২০১৬ অলিম্পিক: রিও কি প্রস্তুত?.txt";
+		String validPath = validateFilePathName(filePath);
+		System.out.println("input:  " + filePath);
+		System.out.println("output: " + validPath);
+
 	}
 }
