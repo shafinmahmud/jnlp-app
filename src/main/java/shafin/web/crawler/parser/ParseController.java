@@ -15,6 +15,7 @@ public class ParseController {
 
 	public List<String> urlList;
 	public List<String> exploredURLs;
+	public List<String> skippedURLs;
 	public List<String> errorURLs;
 
 	public ParseController(String linksPath, String storagePath) {
@@ -22,15 +23,16 @@ public class ParseController {
 		this.STORAGE_FOLDER_PATH = storagePath;
 		this.urlList = FileHandler.readFile(URL_LIST_FILE_PATH);
 		this.exploredURLs = FileHandler.readFileOrCreateIfNotExists(STORAGE_FOLDER_PATH + "explored.db");
+		this.skippedURLs = FileHandler.readFileOrCreateIfNotExists(STORAGE_FOLDER_PATH + "skipped.db");
 
-		FileHandler.deleteFile(STORAGE_FOLDER_PATH + "skipped.db");
+		FileHandler.deleteFile(STORAGE_FOLDER_PATH + "error.db");
 		this.errorURLs = FileHandler.readFileOrCreateIfNotExists(STORAGE_FOLDER_PATH + "error.db");
 	}
 
 	public void parseAndStoreAsTxt() {
 		int counter = 0;
 		for (String url : this.urlList) {
-			if (!exploredURLs.contains(url)) {
+			if (!exploredURLs.contains(url) && !skippedURLs.contains(url)) {
 				try {
 					Document doc = parseDocument(url);
 
@@ -40,10 +42,12 @@ public class ParseController {
 						FileHandler.appendFile(STORAGE_FOLDER_PATH + "explored.db", url + "\n");
 						System.out.println(counter + ": WRITTEN: " + url);
 					} else {
+						FileHandler.appendFile(STORAGE_FOLDER_PATH + "skipped.db", url + "\n");
 						System.out.println(counter + ": SKIPPED: " + url);
 					}
 				} catch (NullPointerException | IOException e) {
 					e.printStackTrace();
+					System.out.println(counter + ": ERROR: " + url);
 					FileHandler.appendFile(STORAGE_FOLDER_PATH + "error.db", url + "\n");
 				}
 			}
@@ -54,7 +58,7 @@ public class ParseController {
 	public void parseAndStoreAsJson() {
 		int counter = 0;
 		for (String url : this.urlList) {
-			if (!exploredURLs.contains(url)) {
+			if (!exploredURLs.contains(url) && !skippedURLs.contains(url)) {
 				try {
 					Document doc = parseDocument(url);
 					if (doc != null) {
@@ -65,10 +69,12 @@ public class ParseController {
 						FileHandler.appendFile(STORAGE_FOLDER_PATH + "explored.db", url + "\n");
 						System.out.println(counter + ": WRITTEN: " + url);
 					} else {
+						FileHandler.appendFile(STORAGE_FOLDER_PATH + "skipped.db", url + "\n");
 						System.out.println(counter + ": SKIPPED: " + url);
 					}
 				} catch (NullPointerException | IOException e) {
 					e.printStackTrace();
+					System.out.println(counter + ": ERROR: " + url);
 					FileHandler.appendFile(STORAGE_FOLDER_PATH + "error.db", url + "\n");
 				}
 			}

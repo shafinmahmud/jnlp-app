@@ -76,7 +76,7 @@ public class JsoupParser {
 
 		Iterator headIterator = header.entrySet().iterator();
 		while (headIterator.hasNext()) {
-			HashMap.Entry data = (HashMap.Entry) headIterator.next();
+			Map.Entry data = (Map.Entry) headIterator.next();
 			con.header(data.getKey().toString(), data.getValue().toString());
 		}
 

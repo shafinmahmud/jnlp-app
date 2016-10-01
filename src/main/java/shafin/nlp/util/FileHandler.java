@@ -33,7 +33,7 @@ public class FileHandler {
 	}
 
 	public static List<String> getRecursiveFileList(String path) throws IOException {
-		List<String> fileList = new ArrayList<>();
+		final List<String> fileList = new ArrayList<>();
 
 		class FileRecursion {
 			private void listFilesForFolder(File folder) {
@@ -269,7 +269,7 @@ public class FileHandler {
 		}
 	}
 
-	private static String getFileExtensionFromPathString(String filePath) {
+	public static String getFileExtensionFromPathString(String filePath) {
 		try {
 			int idx = filePath.lastIndexOf(".");
 			if (idx >= 0) {
@@ -280,6 +280,14 @@ public class FileHandler {
 		} catch (Exception e) {
 			throw e;
 		}
+	}
+	
+	public static String getDirectoryFromFilePathString(String path){
+		File file = new File(path);
+		if(!file.isDirectory()){
+			return file.getParentFile().getAbsolutePath();
+		}
+		return path;
 	}
 
 	public static void main(String[] args) {

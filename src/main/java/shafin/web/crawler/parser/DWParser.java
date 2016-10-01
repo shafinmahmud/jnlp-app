@@ -124,7 +124,7 @@ public class DWParser implements DocumentParser{
 			contentElement = JsoupParser.removeElement(contentElement, ".picBox");
 			contentElement = JsoupParser.removeElement(contentElement, ".gallery");
 			contentElement = JsoupParser.removeElement(contentElement, "strong:contains(আপনার কি কিছু বলার আছে?)");
-			return intro+"\n"+contentElement.text();
+			return intro+" "+contentElement.text();
 		} catch (NullPointerException e) {
 			return "";
 		}

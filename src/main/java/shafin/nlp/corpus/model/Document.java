@@ -2,7 +2,6 @@ package shafin.nlp.corpus.model;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -12,7 +11,7 @@ public class Document implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@JsonProperty("docID")
-	private int docID;
+	private Integer docID;
 
 	@JsonProperty("source")
 	private String source;
@@ -44,11 +43,11 @@ public class Document implements Serializable {
 	@JsonProperty("article")
 	private String article;
 
-	public int getDocID() {
+	public Integer getDocID() {
 		return docID;
 	}
 
-	public void setDocID(int docID) {
+	public void setDocID(Integer docID) {
 		this.docID = docID;
 	}
 
@@ -134,7 +133,7 @@ public class Document implements Serializable {
 
 	@Override
 	public String toString() {
-		return "docID : " + docID + "\nsource : " + source + "\nlang : " + lang + "\n url : " + url + "\ntitle : "
+		return "docID : " + docID + "\nsource : " + source + "\nlang : " + lang + "\nurl : " + url + "\ntitle : "
 				+ title + "\ndate : " + date + "\nwritter : " + writter + "\ncategories : " + categories
 				+ "\nmanualKeyphrases : " + manualKeyphrases.toString() + "\nautomaticKeyphrases : "
 				+ automaticKeyphrases.toString() + "\narticle : " + article;
