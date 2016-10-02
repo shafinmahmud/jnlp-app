@@ -3,6 +3,7 @@ package shafin.nlp.tfidf;
 import java.util.Iterator;
 import java.util.List;
 
+@Deprecated
 public class TFIDF {
 
 	public static double calculateTF(List<String> totalterms, String termToCheck) {

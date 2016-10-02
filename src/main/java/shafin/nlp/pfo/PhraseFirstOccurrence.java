@@ -2,7 +2,7 @@ package shafin.nlp.pfo;
 
 import java.util.List;
 
-import shafin.nlp.tokenizer.SentenceTokenizer;
+import shafin.nlp.tokenizer.SentenceSpliter;
 
 public class PhraseFirstOccurrence {
 
@@ -21,7 +21,7 @@ public class PhraseFirstOccurrence {
 
 		int SP = 0;
 		/* sentence analysis */
-		List<String> sentenceArray = SentenceTokenizer.getSentenceTokenListBn(text);
+		List<String> sentenceArray = SentenceSpliter.getSentenceTokenListBn(text);
 		for (int i = 0; i < sentenceArray.size(); i++) {
 			if (sentenceArray.get(i).contains(phrase)) {
 				SP = i + 1;

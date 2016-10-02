@@ -15,7 +15,7 @@ import shafin.nlp.corpus.model.Document;
 import shafin.nlp.pfo.PhraseFirstOccurrenceHelper;
 import shafin.nlp.stemmer.StemmerHelper;
 import shafin.nlp.tfidf.TFIDFHelper;
-import shafin.nlp.tokenizer.SentenceTokenizer;
+import shafin.nlp.tokenizer.SentenceSpliter;
 import shafin.nlp.util.FMeasure;
 import shafin.nlp.util.FileHandler;
 import shafin.nlp.util.JsonProcessor;
@@ -59,7 +59,7 @@ public class NGramRanking {
 				COURPUS_DOC.add(doc);
 
 				/* sentence analysis */
-				List<String> sentenceTokens = SentenceTokenizer.getSentenceTokenListBn(text);
+				List<String> sentenceTokens = SentenceSpliter.getSentenceTokenListBn(text);
 				numberOfDocument++;
 				numberOfSenctence += sentenceTokens.size();
 

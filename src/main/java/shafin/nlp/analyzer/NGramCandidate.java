@@ -1,11 +1,12 @@
 package shafin.nlp.analyzer;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import shafin.nlp.tokenizer.NGramTokenizer;
-import shafin.nlp.tokenizer.SentenceTokenizer;
+import shafin.nlp.tokenizer.NGramAnalyzer;
+import shafin.nlp.tokenizer.SentenceSpliter;
 import shafin.nlp.util.FileHandler;
 
 public class NGramCandidate {
@@ -23,11 +24,11 @@ public class NGramCandidate {
 	public List<String> getNGramCandidateKeysFilteringSW(int min, int max) throws IOException {
 
 		List<String> nGramCandidates = new ArrayList<>();
-		List<String> sentenceList = SentenceTokenizer.getSentenceTokenListBn(DOCUMENT_TEXT);
+		List<String> sentenceList = SentenceSpliter.getSentenceTokenListBn(DOCUMENT_TEXT);
 
 		for (String sentence : sentenceList) {
 			/* tuning NGram for uni- bi- tri gram */
-			NGramTokenizer analyzer = new NGramTokenizer(min, max);
+			NGramAnalyzer analyzer = new NGramAnalyzer(new StringReader(sentence), min, max);
 			List<String> nGramTokens = analyzer.getNGramTokens(sentence);
 			analyzer.close();
 

@@ -2,7 +2,7 @@ package shafin.nlp.analyzer;
 
 import java.util.List;
 
-import shafin.nlp.tokenizer.SentenceTokenizer;
+import shafin.nlp.tokenizer.SentenceSpliter;
 
 public class SentencAnalayzer {
 	
@@ -13,7 +13,7 @@ public class SentencAnalayzer {
 	}
 	
 	public List<String> getSentenceTokens() {
-		return SentenceTokenizer.getSentenceTokenListBn(TEXT);
+		return SentenceSpliter.getSentenceTokenListBn(TEXT);
 	}
 	
 	public static void main(String[] args) {

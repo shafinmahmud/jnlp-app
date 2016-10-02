@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import shafin.nlp.corpus.model.Document;
-import shafin.nlp.tokenizer.SentenceTokenizer;
+import shafin.nlp.tokenizer.SentenceSpliter;
 import shafin.nlp.util.FileHandler;
 import shafin.nlp.util.JsonProcessor;
 
@@ -34,7 +34,7 @@ public class SentenceAnalyzer {
 				Document doc = (Document) processor.convertToModel(Document.class);
 
 				String article = doc.getArticle();
-				List<String> sentences = SentenceTokenizer.getSentenceTokenListBn(article);
+				List<String> sentences = SentenceSpliter.getSentenceTokenListBn(article);
 
 				numberOfDocument++;
 				numberOfSenctence += sentences.size();
