@@ -16,9 +16,8 @@ public class DocumentParser {
 
 	private List<String> tokensExcludingStopwords;
 
-	public DocumentParser(String text) {
-		
-		this.tokens = Tokenizer.getTokenizedBnList(text);
+	public DocumentParser(String text) {		
+		this.tokens = WordTokenizer.getTokenizedBnList(text);
 		this.stopWords = new HashSet<>(FileHandler.readFile("D:\\DOCUMENT\\PROJECTS\\SPRING\\ml-tfidf\\stopwords.txt"));
 		this.MALICIOUS_TOKEN = new HashSet<>(FileHandler.readFile("D:\\DOCUMENT\\PROJECTS\\SPRING\\ml-tfidf\\maltoken.txt"));
 	}

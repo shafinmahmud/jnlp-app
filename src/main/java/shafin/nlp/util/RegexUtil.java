@@ -41,8 +41,8 @@ public class RegexUtil {
 	}
 
 	public static void main(String[] args) {
-		String string = "ARD has been implementing dhaka Comprehensive in Dhanmondi Eye Care Services through well established four Eye Hospitals located in Sylhet district,";
-		Set<String> matches = findUniqueMatchedStrings(string, "(?i)(dha[\\w]*)");
-		System.out.println(matches);
+		String string = "ARD vah9 has had been implementing dhaka Comprehensive in Dhanmondi Eye Care "
+				+ "Services through well established four Eye Hospitals located in Sylhet district,";
+		System.out.println(getFirstMatch(string, "([\\s\\t\\n\\r\\f,.:;\\?\\!\\[\\]\\(\\)\\{\\}।]+)"));
 	}
 }

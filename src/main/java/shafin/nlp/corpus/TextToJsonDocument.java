@@ -20,13 +20,13 @@ import shafin.nlp.util.ReflectionUtil;
  * Docuement Has to have '{FieldName} : {FieldValue}' format per line. No field should have
  * value in multiple lines
  */
-public class ToJsonDocument<T> {
+public class TextToJsonDocument<T> {
 
 	private final String TEXT_FILES_DIRECTORY;
 	private final String JSON_FILES_DIRECTORY;
 	private final Class<T> DOCUMENT_CLASS;
 
-	public ToJsonDocument(Class<T> clazz, String txtDirectory, String jsonDirectory) {
+	public TextToJsonDocument(Class<T> clazz, String txtDirectory, String jsonDirectory) {
 		this.DOCUMENT_CLASS = clazz;
 		this.TEXT_FILES_DIRECTORY = txtDirectory;
 		this.JSON_FILES_DIRECTORY = jsonDirectory;
@@ -88,7 +88,9 @@ public class ToJsonDocument<T> {
 			
 			if(!fieldMatched){
 				Object val = ReflectionUtil.getValue(document, lastFieldName);
-				ReflectionUtil.setValue(document, lastFieldName, val+"	"+line);
+				
+				line = " "+line;
+				ReflectionUtil.setValue(document, lastFieldName, val+line);
 			}
 
 		}
@@ -98,7 +100,7 @@ public class ToJsonDocument<T> {
 	public static void main(String[] args) throws InstantiationException, IllegalAccessException, IOException {
 		String directory = "D:/home/dw/data";
 		String jsonDir = "D:/home/dw/json";
-		ToJsonDocument<Document> converter = new ToJsonDocument<Document>(Document.class, directory, jsonDir);
+		TextToJsonDocument<Document> converter = new TextToJsonDocument<Document>(Document.class, directory, jsonDir);
 		converter.process();
 	}
 }

@@ -11,25 +11,21 @@ public class SentenceTokenizer {
 			"\u202F", "\u205F", "\u3000", "\uFEFF" };
 
 	public static String[] getSentenceTokenArrayBn(String text) {
-
 		text = replaceAll(UNICODE_SPACE_CHARACTERS, " ", text);
 		text = text.replaceAll("\\s+", " ");
 
 		String pattern = "(?<!\\w\\।\\w।)(?<![A-Z][a-z]\\।)(?<=\\।|\\?)\\s";
 		String[] sentences = text.split(pattern);
-
 		return sentences;
 	}
 
 	public static List<String> getSentenceTokenListBn(String text) {
-
 		text = replaceAll(UNICODE_SPACE_CHARACTERS, " ", text);
 		text = text.replaceAll("\\s+", " ");
 	
 		/* https://regex101.com/r/nG1gU7/142 for the explanation of the pattern  */	
 		String pattern = "(?<!\\w\\।\\w।)(?<![A-Z][a-z]\\।)(?<=।|\\?|।”|।’|\\?”|\\?’|।“|।‘|\\?“|\\?‘)\\s";
-		String[] sentences = text.split(pattern);
-		
+		String[] sentences = text.split(pattern);		
 		return new ArrayList<String>(Arrays.asList(sentences));
 	}
 

@@ -12,7 +12,7 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
 import shafin.nlp.corpus.model.Document;
-import shafin.nlp.tokenizer.Tokenizer;
+import shafin.nlp.tokenizer.WordTokenizer;
 import shafin.nlp.util.FileHandler;
 import shafin.nlp.util.JsonProcessor;
 import shafin.nlp.util.MapUtil;
@@ -44,7 +44,7 @@ public class WordAnalyzer {
 				Document doc = (Document) processor.convertToModel(Document.class);
 
 				String article = doc.getArticle();
-				List<String> tokens = Tokenizer.getTokenizedBnList(article);
+				List<String> tokens = WordTokenizer.getTokenizedBnList(article);
 
 				for (String token : tokens) {
 					int count = termFrequency.containsKey(token) ? termFrequency.get(token) : 0;
