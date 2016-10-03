@@ -86,8 +86,6 @@ public class DocumentIndexer {
 	private void createIndex(final String TEXT) throws IOException {
 		List<String> SENTENCES = SentenceSpliter.getSentenceTokenListBn(TEXT);
 		for (String sentence : SENTENCES) {
-
-			System.out.println(sentence);
 			Analyzer analyzer = new NGramAnalyzer(new StringReader(sentence), MIN_NGRAM, MAX_NGRAM);
 			IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
 			IndexWriter writer = new IndexWriter(directory, iwc);
