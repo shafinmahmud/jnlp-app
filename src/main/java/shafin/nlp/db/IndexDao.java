@@ -308,7 +308,8 @@ public class IndexDao extends BasicDao<TermIndex> {
 			statement.addBatch("INSERT INTO term_index(doc_id, term, tf, df, ps) SELECT * FROM _term_index;");
 
 			/* DROP Temp tables if exists */
-			statement.addBatch("DROP TABLE IF EXISTS _temp; DROP TABLE IF EXISTS _term_index;");
+			statement.addBatch("DROP TABLE IF EXISTS _temp;");
+			statement.addBatch("DROP TABLE IF EXISTS _term_index;");
 
 			Logger.print("UPDATING DOCUMENT FREQ...");
 			statement.executeBatch();

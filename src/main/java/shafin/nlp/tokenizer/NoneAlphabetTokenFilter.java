@@ -1,6 +1,8 @@
 package shafin.nlp.tokenizer;
 
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
@@ -12,14 +14,20 @@ import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
  * Email : shafin.mahmnud@gmail.com
  * 
  */
-public class EmptyStringTokenFilter extends TokenFilter {
+public class NoneAlphabetTokenFilter extends TokenFilter {
+
+	public static String[] UNICODE_SPACE_CHARACTERS = { "\u0020", "\u00A0", "\u180E", "\u1680", "\u2000", "\u2001",
+			"\u2002", "\u2003", "\u2004", "\u2005", "\u2006", "\u2007", "\u2008", "\u2009", "\u200A", "\u200B",
+			"\u202F", "\u205F", "\u3000", "\uFEFF" };
+
+	public static final String ALPHABETIC_CHAR_CAPTURING_REGEX = "[^.।,`~!@#$%^&*()_\\-+=\\|{}\\[\\]'\";:\\/\\?<>‘’—\\s]+";
 
 	/*
 	 * The constructor for our custom token filter just calls the TokenFilter
 	 * constructor; that constructor saves the token stream in a variable named
 	 * this.input.
 	 */
-	public EmptyStringTokenFilter(TokenStream tokenStream) {
+	public NoneAlphabetTokenFilter(TokenStream tokenStream) {
 		super(tokenStream);
 	}
 
@@ -59,11 +67,12 @@ public class EmptyStringTokenFilter extends TokenFilter {
 
 			// Get text of the current token and remove any
 			// leading/trailing whitespace.
-			String currentTokenInStream = this.input.getAttribute(CharTermAttribute.class).toString().trim();
+			String token = replaceAllUnicodeSpace(this.input.getAttribute(CharTermAttribute.class).toString());
+			String currentTokenInStream = token.trim();
 
 			// Save the token if it is not an empty string
-			if (currentTokenInStream.length() > 0) {
-				nextToken = currentTokenInStream;
+			if (currentTokenInStream.length() > 0 && doesContainAlphaNumeric(currentTokenInStream)){
+					nextToken = currentTokenInStream;
 			}
 		}
 
@@ -71,5 +80,23 @@ public class EmptyStringTokenFilter extends TokenFilter {
 		this.charTermAttribute.setEmpty().append(nextToken);
 		this.positionIncrementAttribute.setPositionIncrement(1);
 		return true;
+	}
+
+	public static boolean doesContainAlphaNumeric(String text) {
+		Pattern pattern = Pattern.compile(ALPHABETIC_CHAR_CAPTURING_REGEX);
+		Matcher matcher = pattern.matcher(text);
+		if (matcher.find()) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static String replaceAllUnicodeSpace(String text) {
+		StringBuffer sb = new StringBuffer(text);
+		for (int i = 0; i < UNICODE_SPACE_CHARACTERS.length; i++) {
+			sb = new StringBuffer(sb.toString().replaceAll(UNICODE_SPACE_CHARACTERS[i], " "));
+		}
+		return sb.toString();
 	}
 }

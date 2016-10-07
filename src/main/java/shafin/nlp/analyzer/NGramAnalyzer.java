@@ -13,6 +13,7 @@ import org.apache.lucene.analysis.shingle.ShingleFilter;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 
 import shafin.nlp.tokenizer.BanglaWordTokenizer;
+import shafin.nlp.tokenizer.NoneAlphabetTokenFilter;
 
 /*
  * Author : Shafin Mahmud
@@ -52,14 +53,14 @@ public class NGramAnalyzer extends Analyzer {
 		 * shingles "please divide", "divide this", "this sentence",
 		 * "sentence into", and "into shingles".
 		 */
-		ShingleFilter sf = new ShingleFilter(tokenizer, minWords, maxWords);
-
+		ShingleFilter shingleFilter = new ShingleFilter(tokenizer, minWords, maxWords);
 		// makes it false to no one word phrases outin the output.
-		sf.setOutputUnigrams(true);
+		shingleFilter.setOutputUnigrams(true);
 		// if not enough for minimum, show anyway.
-		sf.setOutputUnigramsIfNoShingles(true);
-
-		return new TokenStreamComponents(tokenizer, sf);
+		shingleFilter.setOutputUnigramsIfNoShingles(true);
+ 	
+		TokenStream noneAlphabetFilter = new NoneAlphabetTokenFilter(shingleFilter);
+		return new TokenStreamComponents(tokenizer, noneAlphabetFilter);
 	}
 
 	public List<String> getNGramTokens() throws IOException {
