@@ -7,6 +7,7 @@ import java.util.Set;
 import shafin.nlp.util.FileHandler;
 
 
+@Deprecated
 public class DocumentParser {
 
 	private Set<String> MALICIOUS_TOKEN;

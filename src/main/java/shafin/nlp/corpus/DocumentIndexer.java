@@ -3,33 +3,27 @@ package shafin.nlp.corpus;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field.Store;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.index.Terms;
-import org.apache.lucene.index.TermsEnum;
-import org.apache.lucene.search.similarities.ClassicSimilarity;
-import org.apache.lucene.search.similarities.TFIDFSimilarity;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.util.BytesRef;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 
-import shafin.nlp.tokenizer.NGramAnalyzer;
+import shafin.nlp.analyzer.BanglaWordAnalyzer;
+import shafin.nlp.analyzer.NGramAnalyzer;
+import shafin.nlp.db.IndexService;
+import shafin.nlp.db.TermIndex;
+import shafin.nlp.pfo.FeatureExtractor;
 import shafin.nlp.tokenizer.SentenceSpliter;
 import shafin.nlp.util.FileHandler;
 import shafin.nlp.util.JsonProcessor;
 import shafin.nlp.util.Logger;
+import shafin.nlp.util.RegexUtil;
 
 /*
  * Author : Shafin Mahmud
@@ -40,110 +34,111 @@ public class DocumentIndexer {
 
 	public static final String ID = "id";
 	public static final String CONTENT = "content";
+	public static final String POSITION = "position";
 
 	private final String CORPUS_DIRECTORY;
-	private final String INDEX_STORE_PATH = "D:/home/dw/indx/";
 	private final String EXTENSION = ".json";
 
+	private final boolean NGRAM_FLAG;
 	private final int MIN_NGRAM = 2;
 	private final int MAX_NGRAM = 3;
 
-	private final Directory directory;
+	private final IndexService indexService;
 
-	private long docID;
-
-	public DocumentIndexer(String corpusDir) throws IOException {
+	public DocumentIndexer(String corpusDir, boolean enableNGramTokenize) throws IOException {
+		this.NGRAM_FLAG = enableNGramTokenize;
 		this.CORPUS_DIRECTORY = corpusDir;
-		this.directory = FSDirectory.open(new File(INDEX_STORE_PATH).toPath());
-		cleanIndexDirectory();
-		iterAndIndexDocuments();
+		this.indexService = new IndexService();
 	}
 
-	private void cleanIndexDirectory() throws IOException {
-		List<String> filePaths = FileHandler.getRecursiveFileList(INDEX_STORE_PATH);
-		for (String filePath : filePaths) {
-			File file = new File(filePath);
-			file.delete();
-		}
-	}
+	public void iterAndIndexDocuments() throws JsonParseException, JsonMappingException, IOException {
+		indexService.recreatIndex();
 
-	private void iterAndIndexDocuments() throws JsonParseException, JsonMappingException, IOException {
 		List<String> filePaths = FileHandler.getRecursiveFileList(CORPUS_DIRECTORY);
 		for (String filePath : filePaths) {
 			if (filePath.endsWith(EXTENSION)) {
+
+				String fileName = FileHandler.getFileNameFromPathString(filePath);
+				String docID = RegexUtil.getFirstMatch(fileName, "[0-9]+");
 
 				Logger.print("INDEXING : " + filePath);
 				JsonProcessor jsonProcessor = new JsonProcessor(new File(filePath));
 				shafin.nlp.corpus.model.Document document = (shafin.nlp.corpus.model.Document) jsonProcessor
 						.convertToModel(shafin.nlp.corpus.model.Document.class);
 
-				final String article = document.getArticle();
-				createIndex(article);
+				String article = document.getArticle();
+
+				if (!article.trim().isEmpty()) {
+					createIndex(Integer.valueOf(docID), article);
+				}
 			}
 		}
+		indexService.updateDF();
 	}
 
-	private void createIndex(final String TEXT) throws IOException {
-		List<String> SENTENCES = SentenceSpliter.getSentenceTokenListBn(TEXT);
+	private void createIndex(final int docID, final String TEXT) throws IOException {
+		LinkedList<String> SENTENCES = SentenceSpliter.getSentenceTokenListBn(TEXT);
+		Set<String> TOKENS = new HashSet<>();
+
 		for (String sentence : SENTENCES) {
-			Analyzer analyzer = new NGramAnalyzer(new StringReader(sentence), MIN_NGRAM, MAX_NGRAM);
-			IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
-			IndexWriter writer = new IndexWriter(directory, iwc);
-			addDocument(docID, writer, TEXT);
 
-			writer.close();
+			if (NGRAM_FLAG) {
+				NGramAnalyzer analyzer = new NGramAnalyzer(new StringReader(sentence), MIN_NGRAM, MAX_NGRAM);
+				TOKENS.addAll(analyzer.getNGramTokens());
+				analyzer.close();
+			} else {
+				BanglaWordAnalyzer analyzer = new BanglaWordAnalyzer(new StringReader(TEXT));
+				TOKENS.addAll(analyzer.getTokenList());
+				analyzer.close();
+			}
 		}
-		docID++;
+
+		List<TermIndex> termIndexes = new ArrayList<>();
+
+		for (String token : TOKENS) {
+			int tf = FeatureExtractor.getTermOccurrenceCount(TEXT, token);
+			int ps = FeatureExtractor.getOccurrenceOrderInSentence(SENTENCES, token);
+
+			TermIndex index = new TermIndex(docID);
+			index.setTerm(token);
+			index.setTf(tf);
+			index.setPs(ps);
+
+			if (tf < 1) {
+				indexService.enlistAsDiscardedTerm(index);
+			} else {
+				termIndexes.add(index);
+			}
+		}
+
+		indexService.batchInsertIndex(termIndexes);
 	}
 
-	private void addDocument(long docID, IndexWriter writer, String content) throws IOException {
-		Document doc = new Document();
-		doc.add(new VecTextField(ID, String.valueOf(docID), Store.YES));
-		doc.add(new VecTextField(CONTENT, content, Store.YES));
-		writer.addDocument(doc);
-	}
-
-	public Map<String, TermValue> getTFIDF(String docId) throws IOException {
-		IndexReader reader = DirectoryReader.open(directory);
+	public Map<String, TermValue> getFeatureVector(int docId) throws IOException {
 		Map<String, TermValue> termVector = new HashMap<>();
+		List<TermIndex> terms = indexService.getIndexTerm(docId);
+		int numDocs = indexService.countDocs();
 
-		/*
-		 * Retrieve term vector for this document and field, or null if term
-		 * vectors were not indexed.
-		 */
-		Terms vector = reader.getTermVector(Integer.valueOf(docId), CONTENT);
-
-		TermsEnum termsEnum = vector.iterator();
-		BytesRef text = null;
-
-		long totalTerms = vector.size() < 0 ? 0 : vector.size();
-		long totalDocs = reader.getDocCount(CONTENT);
-
-		while ((text = termsEnum.next()) != null) {
-			String term = text.utf8ToString();
-			int freq = (int) termsEnum.totalTermFreq();
-			int docFreq = reader.docFreq(new Term(CONTENT, text));
-
-			TermValue values = new TermValue(totalTerms, totalDocs, freq, docFreq);
-			termVector.put(term, values);
+		for (TermIndex term : terms) {
+			termVector.put(term.getTerm(), new TermValue(term, numDocs));
 		}
+
 		return termVector;
 	}
 
 	class TermValue {
 		private final double tf;
 		private final double idf;
+		private final double pfo;
 
-		public TermValue(long totalTerms, long numDocs, int termFreq, int docFreq) {
-			super();
-
+		public TermValue(TermIndex indexTerm, int numDocs) {
 			/*
 			 * TF : Implemented as sqrt(freq). IDF : Implemented as
 			 * log(numDocs/(docFreq+1)) + 1.
 			 */
-			TFIDFSimilarity similarity = new ClassicSimilarity();
-			this.tf = similarity.tf(termFreq);
-			this.idf = similarity.idf(docFreq, numDocs);
+			this.tf = Math.sqrt(indexTerm.getTf());
+			this.idf = Math.log((double) numDocs / (indexTerm.getDf() + 1)) + 1;
+			this.pfo = (double) (1 / Math.sqrt(indexTerm.getPs()));
 		}
 
 		public double getTf() {
@@ -154,19 +149,44 @@ public class DocumentIndexer {
 			return idf;
 		}
 
+		public double getPfo() {
+			return pfo;
+		}
+
 		@Override
 		public String toString() {
-			return this.tf + " : " + idf;
+			return this.tf + " : " + idf + " : " + pfo;
 		}
 	}
 
 	public static void main(String[] args) throws IOException {
 		String path = "D:/home/dw/json/test/";
-		DocumentIndexer indexer = new DocumentIndexer(path);
+		DocumentIndexer indexer = new DocumentIndexer(path, true);
+		indexer.iterAndIndexDocuments();
 
-		Map<String, TermValue> values = indexer.getTFIDF("1");
+		Map<String, TermValue> values = indexer.getFeatureVector(0);
 		for (Map.Entry<String, TermValue> entry : values.entrySet()) {
 			System.out.println(entry.getKey() + " : " + entry.getValue().toString());
 		}
+
+		/*
+		 * String string =
+		 * "আইএস তাদের সদস্যদের ‘খিলাফতের সৈনিক’ বলে সম্বোধন করে। গুলশান হামলায় জড়িত ও পরে অভিযানে নিহত পাঁচ জঙ্গিকে তারা একই সম্বোধন করে এবং হামলার দায় স্বীকার করে। যদিও বাংলাদেশের আইনশৃঙ্খলা রক্ষাকারী বাহিনীর কর্মকর্তারা বলেছেন, গুলশান হামলায় আইএস নয়, নব্য জেএমবি জড়িত। তামিম চৌধুরী এই নব্য জেএমবির নেতা এবং ১ জুলাই গুলশানের হলি আর্টিজানে হামলার অন্যতম সমন্বয়ক ও পরিকল্পনাকারী। গত ২৭ আগস্ট নারায়ণগঞ্জে জঙ্গিবিরোধী পুলিশের এক অভিযানে তামিম ও তাঁর দুই সহযোগী নিহত হন।"
+		 * ; LinkedList<String> SENTENCES =
+		 * SentenceSpliter.getSentenceTokenListBn(string); Set<String> TOKENS =
+		 * new HashSet<>();
+		 * 
+		 * for(String sentence : SENTENCES){ NGramAnalyzer analyzer = new
+		 * NGramAnalyzer(new StringReader(sentence), 2, 3);
+		 * System.out.println(sentence);
+		 * 
+		 * List<String> list = analyzer.getNGramTokens(); TOKENS.addAll(list);
+		 * 
+		 * analyzer.close(); }
+		 * 
+		 * for(String string2 : TOKENS){ System.out.println(string2 +
+		 * " : "+PhraseFirstOccurrence.getOccurrenceOrderInSentence(SENTENCES,
+		 * string2)); }
+		 */
 	}
 }

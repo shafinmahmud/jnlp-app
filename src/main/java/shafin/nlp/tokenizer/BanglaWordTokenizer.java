@@ -28,7 +28,7 @@ public class BanglaWordTokenizer extends Tokenizer {
 	 * This is the Regex that is used for select the SPLIT_TOKEN (tokens for
 	 * those occurence we want to break the text into pieces
 	 */
-	private static final String SPLIT_REGEX = "([\\s\\t\\n\\r\\f,.;\\/\\?\\!\\[\\]\\(\\)\\{\\}।—৷‘'']+|:[\\s]+|:[\\s]*-[\\s]*)";
+	private static final String SPLIT_REGEX = "([\\s\\t\\n\\r\\f,;\\/\\?\\!\\[\\]\\(\\)\\{\\}।—৷‘''\\+]+|:[\\s]+|:[\\s]*-[\\s]*)";
 
 	/*
 	 * Lucene uses attributes to store information about a single token. For

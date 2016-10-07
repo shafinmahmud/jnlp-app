@@ -9,7 +9,7 @@ public class PhraseFirstOccurrenceHelper {
 	public static Map<String, Double> getPhraseFirstOccurrenceVector(String text, List<String> phraseArray) {
 		Map<String, Double> pfoVector = new HashMap<>();
 		for(String phrase : phraseArray){
-			double pfo = PhraseFirstOccurrence.getPhraseFirstOccurrence(text, phrase);
+			double pfo = FeatureExtractor.getPhraseFirstOccurrence(text, phrase);
 			pfoVector.put(phrase, pfo);
 		}
 		return pfoVector;

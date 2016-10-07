@@ -1,4 +1,4 @@
-package shafin.nlp.tokenizer;
+package shafin.nlp.analyzer;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -11,6 +11,8 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.shingle.ShingleFilter;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+
+import shafin.nlp.tokenizer.BanglaWordTokenizer;
 
 /*
  * Author : Shafin Mahmud
@@ -60,21 +62,15 @@ public class NGramAnalyzer extends Analyzer {
 		return new TokenStreamComponents(tokenizer, sf);
 	}
 
-	public List<String> getNGramTokens(String text) throws IOException {
-
+	public List<String> getNGramTokens() throws IOException {
 		List<String> nGramTokens = new ArrayList<>();
 
 		TokenStream tokenStream = tokenStream("content", reader);
-		// OffsetAttribute offsetAttribute =
-		// tokenStream.addAttribute(OffsetAttribute.class);
 		CharTermAttribute charTermAttribute = tokenStream.addAttribute(CharTermAttribute.class);
 
 		tokenStream.reset();
 		while (tokenStream.incrementToken()) {
-			// int startOffset = offsetAttribute.startOffset();
-			// int endOffset = offsetAttribute.endOffset();
 			String term = charTermAttribute.toString();
-
 			nGramTokens.add(term);
 		}
 		return nGramTokens;
@@ -85,7 +81,7 @@ public class NGramAnalyzer extends Analyzer {
 		NGramAnalyzer analyzer = new NGramAnalyzer(new StringReader(text), 2, 3);
 
 		System.out.println(text);
-		List<String> tokens = analyzer.getNGramTokens(text);
+		List<String> tokens = analyzer.getNGramTokens();
 		for (String token : tokens) {
 			System.out.println(token);
 

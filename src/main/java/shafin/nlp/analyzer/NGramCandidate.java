@@ -5,7 +5,6 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import shafin.nlp.tokenizer.NGramAnalyzer;
 import shafin.nlp.tokenizer.SentenceSpliter;
 import shafin.nlp.util.FileHandler;
 
@@ -29,7 +28,7 @@ public class NGramCandidate {
 		for (String sentence : sentenceList) {
 			/* tuning NGram for uni- bi- tri gram */
 			NGramAnalyzer analyzer = new NGramAnalyzer(new StringReader(sentence), min, max);
-			List<String> nGramTokens = analyzer.getNGramTokens(sentence);
+			List<String> nGramTokens = analyzer.getNGramTokens();
 			analyzer.close();
 
 			/*
