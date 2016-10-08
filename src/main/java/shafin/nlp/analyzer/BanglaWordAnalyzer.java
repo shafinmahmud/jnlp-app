@@ -13,7 +13,7 @@ import org.apache.lucene.analysis.core.LowerCaseFilter;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 
 import shafin.nlp.tokenizer.BanglaWordTokenizer;
-import shafin.nlp.tokenizer.NoneAlphabetTokenFilter;
+import shafin.nlp.tokenizer.NoneWordTokenFilter;
 
 public class BanglaWordAnalyzer extends Analyzer {
 
@@ -31,10 +31,10 @@ public class BanglaWordAnalyzer extends Analyzer {
 	@Override
 	protected TokenStreamComponents createComponents(String fieldName) {
 		Tokenizer tokenizer = new BanglaWordTokenizer(reader);
-		TokenStream filter = new NoneAlphabetTokenFilter(tokenizer);
+		TokenStream filter = new NoneWordTokenFilter(tokenizer);
 		filter = new LowerCaseFilter(filter);
 		
-		TokenStream noneAlphabetFilter = new NoneAlphabetTokenFilter(filter);
+		TokenStream noneAlphabetFilter = new NoneWordTokenFilter(filter);
 		return new TokenStreamComponents(tokenizer, noneAlphabetFilter);
 	}
 

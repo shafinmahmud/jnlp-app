@@ -28,7 +28,8 @@ public class BanglaWordTokenizer extends Tokenizer {
 	 * This is the Regex that is used for select the SPLIT_TOKEN (tokens for
 	 * those occurence we want to break the text into pieces
 	 */
-	private static final String SPLIT_REGEX = "([\\s\\t\\n\\r\\f,;\\/\\?\\!\\[\\]\\(\\)\\{\\}।—৷‘''\\+]+|:[\\s]+|:[\\s]*-[\\s]*)";
+	private static final String SPLIT_REGEX = "([\\s\\t\\n\\r\\f,;\\/\\?\\!\\[\\]\\(\\)\\{\\}।—৷\\+]+"
+												+ "|:[\\s]+|:[\\s]*-[\\s]*" + "|[\\.]{2,})";
 
 	/*
 	 * Lucene uses attributes to store information about a single token. For
@@ -75,19 +76,17 @@ public class BanglaWordTokenizer extends Tokenizer {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		this.stringToTokenize = stringBuilder.toString();
+		this.stringToTokenize = removeUnicodeSpaceChars(stringBuilder);
 	}
 
 	/*
 	 * In preprocessing we removes the UNICODE_SPACE_CHARACRTES from Text
 	 */
-	public void preprocess() {
-		String text = this.stringToTokenize.toString();
+	private String removeUnicodeSpaceChars(StringBuilder sb) {
 		for (int i = 0; i < UNICODE_SPACE_CHARACTERS.length; i++) {
-			text = text.replaceAll(UNICODE_SPACE_CHARACTERS[i], " ");
+			sb = new StringBuilder(sb.toString().replaceAll(UNICODE_SPACE_CHARACTERS[i], " "));
 		}
-		text = text.replaceAll("\\s+", " ");
-		this.stringToTokenize = text;
+		return sb.toString();
 	}
 
 	/*

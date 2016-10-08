@@ -14,11 +14,7 @@ import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
  * Email : shafin.mahmnud@gmail.com
  * 
  */
-public class NoneAlphabetTokenFilter extends TokenFilter {
-
-	public static String[] UNICODE_SPACE_CHARACTERS = { "\u0020", "\u00A0", "\u180E", "\u1680", "\u2000", "\u2001",
-			"\u2002", "\u2003", "\u2004", "\u2005", "\u2006", "\u2007", "\u2008", "\u2009", "\u200A", "\u200B",
-			"\u202F", "\u205F", "\u3000", "\uFEFF" };
+public class NoneWordTokenFilter extends TokenFilter {
 
 	public static final String ALPHABETIC_CHAR_CAPTURING_REGEX = "[^.।,`~!@#$%^&*()_\\-+=\\|{}\\[\\]'\";:\\/\\?<>‘’—\\s]+";
 
@@ -27,7 +23,7 @@ public class NoneAlphabetTokenFilter extends TokenFilter {
 	 * constructor; that constructor saves the token stream in a variable named
 	 * this.input.
 	 */
-	public NoneAlphabetTokenFilter(TokenStream tokenStream) {
+	public NoneWordTokenFilter(TokenStream tokenStream) {
 		super(tokenStream);
 	}
 
@@ -67,8 +63,7 @@ public class NoneAlphabetTokenFilter extends TokenFilter {
 
 			// Get text of the current token and remove any
 			// leading/trailing whitespace.
-			String token = replaceAllUnicodeSpace(this.input.getAttribute(CharTermAttribute.class).toString());
-			String currentTokenInStream = token.trim();
+			String currentTokenInStream = this.input.getAttribute(CharTermAttribute.class).toString();
 
 			// Save the token if it is not an empty string
 			if (currentTokenInStream.length() > 0 && doesContainAlphaNumeric(currentTokenInStream)){
@@ -90,13 +85,5 @@ public class NoneAlphabetTokenFilter extends TokenFilter {
 		} else {
 			return false;
 		}
-	}
-
-	public static String replaceAllUnicodeSpace(String text) {
-		StringBuffer sb = new StringBuffer(text);
-		for (int i = 0; i < UNICODE_SPACE_CHARACTERS.length; i++) {
-			sb = new StringBuffer(sb.toString().replaceAll(UNICODE_SPACE_CHARACTERS[i], " "));
-		}
-		return sb.toString();
 	}
 }

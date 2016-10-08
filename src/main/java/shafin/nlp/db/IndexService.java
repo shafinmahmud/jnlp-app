@@ -20,12 +20,12 @@ public class IndexService {
 		return dao.getIndexesByDocID(docId);
 	}
 
-	public boolean insertIndex(TermIndex index) {
+	public boolean insertIndex(TermIndex index){
 		return dao.insertTerm(index.getDocId(), index.getTerm(), index.getTf(), index.getPs());
 	}
 
 	public boolean batchInsertIndex(List<TermIndex> termIndexes) {
-		return dao.insertTerm(termIndexes);
+		return dao.insertTermInBatch(termIndexes);
 	}
 
 	public int countDocs() {

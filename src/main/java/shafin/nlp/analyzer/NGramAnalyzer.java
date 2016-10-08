@@ -13,7 +13,7 @@ import org.apache.lucene.analysis.shingle.ShingleFilter;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 
 import shafin.nlp.tokenizer.BanglaWordTokenizer;
-import shafin.nlp.tokenizer.NoneAlphabetTokenFilter;
+import shafin.nlp.tokenizer.NoneWordTokenFilter;
 
 /*
  * Author : Shafin Mahmud
@@ -59,7 +59,7 @@ public class NGramAnalyzer extends Analyzer {
 		// if not enough for minimum, show anyway.
 		shingleFilter.setOutputUnigramsIfNoShingles(true);
  	
-		TokenStream noneAlphabetFilter = new NoneAlphabetTokenFilter(shingleFilter);
+		TokenStream noneAlphabetFilter = new NoneWordTokenFilter(shingleFilter);
 		return new TokenStreamComponents(tokenizer, noneAlphabetFilter);
 	}
 
@@ -78,7 +78,7 @@ public class NGramAnalyzer extends Analyzer {
 	}
 
 	public static void main(String[] args) throws IOException {
-		String text = "তিতাস গ্যাসের ব্যবস্থাপনা পরিচালক (এমডি) নওশাদ ইসলামকে ওই পদ থেকে অব্যাহতি দেওয়া হয়েছে। আজ রোববার তাঁকে অব্যাহতি দেওয়া হয়। ";
+		String text = "আর ‘হাউপ্টশুলে'-র ছাত্র-ছাত্রীরা ন'বছর পরেই স্কুলের পাঠ শেষ করে ‘মিটলারে রাইফে'-র সার্টিফিকেট পকেটে নিয়ে পেশাগত প্রশিক্ষণের দিকে চলে যায়৷";
 		NGramAnalyzer analyzer = new NGramAnalyzer(new StringReader(text), 2, 3);
 
 		System.out.println(text);

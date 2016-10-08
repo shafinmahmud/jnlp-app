@@ -225,28 +225,36 @@ public class IndexDao extends BasicDao<TermIndex> {
 
 	}
 
-	public boolean insertTerm(List<TermIndex> termIndexes) {
-		StringBuffer query = null;
+	public boolean insertTermInBatch(List<TermIndex> termIndexes) {
 		try {
-			query = new StringBuffer("INSERT INTO term_index(doc_id, term, tf, ps) VALUES  ");
+			DB_CONN.getConnection().setAutoCommit(false);
+			
+			String query = "INSERT INTO term_index(doc_id, term, tf, ps) VALUES (?,?,?,?)";
+			this.qs = DB_CONN.getConnection().prepareStatement(query.toString());
 
-			int size = termIndexes.size();
-			for (int i = 0; i < size; i++) {
-				TermIndex index = termIndexes.get(i);
-				query.append(" (" + index.getDocId() + ",'" + index.getTerm() + "'," + index.getTf() + ","
-						+ index.getPs() + ")");
-				if (i + 1 != size) {
-					query.append(",");
+			final int batchSize = 1000;
+			int count = 0;
+
+			for (TermIndex index : termIndexes) {
+				this.qs.setInt(1, index.getDocId());
+				this.qs.setString(2, index.getTerm());
+				this.qs.setInt(3, index.getTf());
+				this.qs.setInt(4, index.getPs());
+				this.qs.addBatch();
+
+				if (++count % batchSize == 0) {
+					this.qs.executeBatch();
+					this.DB_CONN.getConnection().commit();
 				}
 			}
 
-			this.qs = DB_CONN.getConnection().prepareStatement(query.toString());
-			this.DB_CONN.executeQuery(this.qs);
-
+			this.qs.executeBatch();
+			this.DB_CONN.getConnection().commit();
+			
+			DB_CONN.getConnection().setAutoCommit(true);
 			return true;
 
 		} catch (IllegalStateException | SQLException e) {
-			System.out.println(query);
 			e.printStackTrace();
 		} finally {
 			leaveGracefully();
@@ -300,8 +308,9 @@ public class IndexDao extends BasicDao<TermIndex> {
 			 * term_index saving it to _term_index
 			 */
 			statement.addBatch("INSERT INTO _temp SELECT term, count(doc_id) as df FROM term_index group by term;");
-			statement.addBatch("INSERT INTO _term_index(doc_id, term, tf, df, ps) SELECT i.doc_id, i.term, i.tf, t.df, i.ps  "
-					+ "FROM term_index  i, _temp t where t.term = i.term;");
+			statement.addBatch(
+					"INSERT INTO _term_index(doc_id, term, tf, df, ps) SELECT i.doc_id, i.term, i.tf, t.df, i.ps  "
+							+ "FROM term_index  i, _temp t where t.term = i.term;");
 
 			/* EMPTY the original term_index and copy from _term_index */
 			statement.addBatch("DELETE FROM term_index;");
