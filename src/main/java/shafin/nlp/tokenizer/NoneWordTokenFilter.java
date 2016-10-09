@@ -63,8 +63,8 @@ public class NoneWordTokenFilter extends TokenFilter {
 
 			// Get text of the current token and remove any
 			// leading/trailing whitespace.
-			String currentTokenInStream = trimToTokenBoundary(
-					this.input.getAttribute(CharTermAttribute.class).toString());
+			String token = this.input.getAttribute(CharTermAttribute.class).toString();
+			String currentTokenInStream = trimToTokenBoundary(token);
 
 			// Save the token if it is not an empty string
 			if (currentTokenInStream.length() > 0) {
@@ -79,7 +79,7 @@ public class NoneWordTokenFilter extends TokenFilter {
 	}
 
 	public static String trimToTokenBoundary(String token) {
-		Pattern pattern = Pattern.compile(TOKEN_BOUNDARY + ".*" + TOKEN_BOUNDARY);
+		Pattern pattern = Pattern.compile(TOKEN_BOUNDARY + ".*" + TOKEN_BOUNDARY+"|"+TOKEN_BOUNDARY);
 		Matcher matcher = pattern.matcher(token);
 		if (matcher.find()) {
 			return matcher.group(0);

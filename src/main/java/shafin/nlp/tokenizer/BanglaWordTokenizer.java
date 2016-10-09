@@ -8,6 +8,8 @@ import java.util.regex.Pattern;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 
+import shafin.nlp.util.StringTool;
+
 /*
  * Author: Shafin Mahmud
  * Email : shafin.mahmnud@gmail.com
@@ -15,14 +17,6 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
  */
 public class BanglaWordTokenizer extends Tokenizer {
 
-	/*
-	 * Some times UTF-8 encoded Text contains spaces that are not in general we
-	 * use. They are some special kind. Below is the list of all UNICODE space
-	 * charactes that we need to remove from the text for usual text processing.
-	 */
-	private static String[] UNICODE_SPACE_CHARACTERS = { "\u0020", "\u00A0", "\u180E", "\u1680", "\u2000", "\u2001",
-			"\u2002", "\u2003", "\u2004", "\u2005", "\u2006", "\u2007", "\u2008", "\u2009", "\u200A", "\u200B",
-			"\u202F", "\u205F", "\u3000", "\uFEFF" };
 
 	/*
 	 * This is the Regex that is used for select the SPLIT_TOKEN (tokens for
@@ -76,19 +70,10 @@ public class BanglaWordTokenizer extends Tokenizer {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		this.stringToTokenize = removeUnicodeSpaceChars(stringBuilder);
+		this.stringToTokenize = StringTool.removeUnicodeSpaceChars(stringBuilder);
 	}
 
-	/*
-	 * In preprocessing we removes the UNICODE_SPACE_CHARACRTES from Text
-	 */
-	private String removeUnicodeSpaceChars(StringBuilder sb) {
-		for (int i = 0; i < UNICODE_SPACE_CHARACTERS.length; i++) {
-			sb = new StringBuilder(sb.toString().replaceAll(UNICODE_SPACE_CHARACTERS[i], " "));
-		}
-		return sb.toString();
-	}
-
+	
 	/*
 	 * This is the important function to override from the Tokenizer class. At
 	 * each call, it should set the value of this.charTermAttribute to the text

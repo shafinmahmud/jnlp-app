@@ -9,7 +9,6 @@ import java.util.List;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
-import org.apache.lucene.analysis.core.LowerCaseFilter;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 
 import shafin.nlp.tokenizer.BanglaWordTokenizer;
@@ -32,7 +31,6 @@ public class BanglaWordAnalyzer extends Analyzer {
 	protected TokenStreamComponents createComponents(String fieldName) {
 		Tokenizer tokenizer = new BanglaWordTokenizer(reader);
 		TokenStream filter = new NoneWordTokenFilter(tokenizer);
-		filter = new LowerCaseFilter(filter);
 		
 		TokenStream noneAlphabetFilter = new NoneWordTokenFilter(filter);
 		return new TokenStreamComponents(tokenizer, noneAlphabetFilter);
@@ -53,12 +51,13 @@ public class BanglaWordAnalyzer extends Analyzer {
 	}
 
 	public static void main(String[] args) {
-		String text = "অবশ্য জাতীয় পরিচয় নিবন্ধন আইন-২০১০-এ বলা আছে, জাতীয় পরিচয়ের জন্য একজন নাগরিকের বায়োমেট্রিকস ফিচার, "
-				+ "যেমন: আঙুলের ছাপ, হাতের ছাপ, তালুর ছাপ, আইরিশ বা চোখের মণির ছবি, মুখমণ্ডলের ছবি, ডিএনএ, স্বাক্ষর এবং কণ্ঠস্বর সংগ্রহ ও সংরক্ষণ করতে হবে। ";
+		String text = "অবশ্য জাতীয় পরিচয় নিবন্ধন আইন-২০১০-এ বলা আছে, "
+				+ "যেমন: আঙুলের ছাপ,স্বাক্ষর এবং কণ্ঠস্বর সংগ্রহ ও সংরক্ষণ করতে হবে। ";
 		Reader reader = new StringReader(text);
 
 		BanglaWordAnalyzer analyzer = new BanglaWordAnalyzer(reader);
 		List<String> ss = analyzer.getTokenList();
+		System.out.println(text);
 		System.out.print(ss + " \n");
 		analyzer.close();
 	}

@@ -10,11 +10,11 @@ import shafin.nlp.util.RegexUtil;
 
 public class FeatureExtractor {
 
-	private static final String BOUNDARY = "\\s|\\(|\\)|\\.|\\'|\"|!|,|\\?|;";
+	private static final String BOUNDARY = "\\s|\\/|\\(|\\)|\\.|-|–|\\'|\"|!|,|,|\\?|;|’|‘|\\+|৷ |৷|।|—|:";
 	public static final String WORD_BOUNDARY_START = "(^|"+BOUNDARY+")";
-	public static final String WORD_BOUNDARY_END = "($|"+BOUNDARY+")";
+	public static final String WORD_BOUNDARY_END = "($|"+BOUNDARY+"\\s)";
 	
-	public static final String NON_WORD_FORMING_CHARS_REGEX = "[.,’‘';:\\(\\)\\/\\s]+";
+	public static final String NON_WORD_FORMING_CHARS_REGEX = "[-.,—’‘';:\\(\\)\\/\\s–]+";
 
 	public static int getOccurrenceOrderInSentence(LinkedList<String> sentences, String phrase) {
 		String wildPhrase = getWildPhraseRegex(phrase);	
@@ -76,9 +76,9 @@ public class FeatureExtractor {
 	}
 
 	public static void main(String[] args) {
-		String text = "শেষ ম্যাচের আগেই অস্ট্রেলিয়ান অধিনায়ক স্মিথ বলেছিলেন, বিশেষ  শেষ  ‘ওদের ব্যাটিং তো ভয়ংকর, বিশেষ করে বিরাট কোহলি।’ ওদের মানে ভারত।";
+		String text = "নিজের মতামত দিতে পারবে। স্তর C1 | নিয়মিত যোগাযোগ";
 				
-		String phrase = "শেষ ";
+		String phrase = "মতামত দিতে পারবে";
 		System.out.println(getTermOccurrenceCount(text, phrase));
 	}
 }

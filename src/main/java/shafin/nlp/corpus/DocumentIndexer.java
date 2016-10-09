@@ -25,6 +25,7 @@ import shafin.nlp.util.FileHandler;
 import shafin.nlp.util.JsonProcessor;
 import shafin.nlp.util.Logger;
 import shafin.nlp.util.RegexUtil;
+import shafin.nlp.util.StringTool;
 
 /*
  * Author : Shafin Mahmud
@@ -69,7 +70,7 @@ public class DocumentIndexer {
 				shafin.nlp.corpus.model.Document document = (shafin.nlp.corpus.model.Document) jsonProcessor
 						.convertToModel(shafin.nlp.corpus.model.Document.class);
 
-				String article = document.getArticle();
+				String article = StringTool.removeUnicodeSpaceChars(new StringBuilder(document.getArticle()));
 
 				if (!article.trim().isEmpty()) {
 					createIndex(Integer.valueOf(docID), article);
@@ -103,7 +104,7 @@ public class DocumentIndexer {
 			 * filter NGram for removing tokens starts or ends with stop-words
 			 */
 			if (!this.stopWordFilter.doesContainStopWordInBoundary(token)) {
-				
+
 				int tf = FeatureExtractor.getTermOccurrenceCount(TEXT, token);
 				int ps = FeatureExtractor.getOccurrenceOrderInSentence(SENTENCES, token);
 

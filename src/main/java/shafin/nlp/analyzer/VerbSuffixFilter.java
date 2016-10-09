@@ -4,22 +4,22 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import shafin.nlp.pos.PosTagger;
 
 public class VerbSuffixFilter {
 
-	private static String[] VERB_SUFFIX_1 = { " ি", " ো", " ে", "ছ", "ল ", "ত", "ব" };
-	private static String[] VERB_SUFFIX_2 = { " িস", "েন	", "ছি", "েছ", "লে", "লি", "তে", "তি", "বে", "বি" };
-	private static String[] VERB_SUFFIX_3 = { "ছিস", "ছেন", "ছে", " েছি", "েছে", "লাম", "লেন", "ছিল", "তাম", "তেন",
-			"বেন" };
-	private static String[] VERB_SUFFIX_4 = { "েছিস", "েছেন", "েছেন", "ছিলে", "ছিলি", "েছিল" };
-	private static String[] VERB_SUFFIX_5 = { " িতেছি ", "ছিলাম", "ছিলেন", "েছিলে", "েছিলি" };
-	private static String[] VERB_SUFFIX_6 = { "েছিলাম", "েছিলেন" };
+	private final static String[] VERB_SUFFIX_1 = { " ি", " ো", " ে", "ছ", "ল ", "ত", "ব" };
+	private final static String[] VERB_SUFFIX_2 = { " িস", "েন	", "ছি", "েছ", "লে", "লি", "তে", "তি", "বে", "বি" };
+	private final static String[] VERB_SUFFIX_3 = { "ছিস", "ছেন", "ছে", " েছি", "েছে", "লাম", "লেন", "ছিল", "তাম", "তেন",
+													"বেন" };
+	private final static String[] VERB_SUFFIX_4 = { "েছিস", "েছেন", "েছেন", "ছিলে", "ছিলি", "েছিল" };
+	private final static String[] VERB_SUFFIX_5 = { " িতেছি ", "ছিলাম", "ছিলেন", "েছিলে", "েছিলি" };
+	private final static String[] VERB_SUFFIX_6 = { "েছিলাম", "েছিলেন" };
 
-	public static List<String> getSuffixedVerbTokens(String text, MaxentTagger tagger) throws ClassNotFoundException, IOException {
+	public static List<String> getSuffixedVerbTokens(String text) throws ClassNotFoundException, IOException {
 		List<String> suffixedVerbsToken = new ArrayList<>();
-		List<String> verbTokens = PosTagger.findVerbTaggedTokens(text, tagger);
+		PosTagger posTagger = new PosTagger(text);
+		List<String> verbTokens = posTagger.findVerbTaggedTokens();
 		for (String verb : verbTokens) {
 			if (matchSuffix(verb)) {
 				suffixedVerbsToken.add(verb);
@@ -58,10 +58,10 @@ public class VerbSuffixFilter {
 		return false;
 	}
 
-	public static List<String> filterVerbSuffixCandidates(String text, List<String> candidates, MaxentTagger tagger)
+	public static List<String> filterVerbSuffixCandidates(String text, List<String> candidates)
 			throws ClassNotFoundException, IOException {
 		List<String> filteredList = new ArrayList<>();
-		List<String> itchyVerbs = getSuffixedVerbTokens(text, tagger);
+		List<String> itchyVerbs = getSuffixedVerbTokens(text);
 		for (String candidate : candidates) {
 			for (String itchy : itchyVerbs) {
 				if (!candidate.startsWith(itchy) && !candidate.endsWith(itchy)) {
@@ -73,13 +73,12 @@ public class VerbSuffixFilter {
 	}
 
 	public static void main(String[] args) throws ClassNotFoundException, IOException {
-
-		MaxentTagger tagger = new MaxentTagger("taggers/bengaliModelFile.tagger");
 		String text = "ভারতীয় টেলিভিশনের জনপ্রিয় ধারাবাহিক ‘বালিকা বধূ’র পরিচিত মুখ বাঙালি অভিনেত্রী প্রত্যুষা বন্দ্যোপাধ্যায়ের মৃত্যুর "
 				+ " সঙ্গে নিজের সম্পৃক্ততার কথা অস্বীকার করেছেন তাঁর প্রেমিক অভিনেতা-প্রযোজক রাহুল রাজ সিং। তিনি বলেন, প্রত্যুষাকে বিয়ের জন্য প্রস্তুতিও নিচ্ছিলেন।"
 				+ "আজ রোববার এনডিটিভি অনলাইনের এক প্রতিবেদনে বলা হয়েছে, প্রাথমিক জিজ্ঞাসাবাদে পুলিশের কাছে এমনটাই দাবি করেছেন প্রত্যুষার প্রেমিক রাহুল রাজ।";
-		List<String> sample = getSuffixedVerbTokens(text,tagger);
+		List<String> sample = getSuffixedVerbTokens(text);
 
+		System.out.println(text);
 		for (String token : sample) {
 			System.out.println(token);
 		}

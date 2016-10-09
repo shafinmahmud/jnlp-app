@@ -51,7 +51,7 @@ public class BnStopWordFilter {
 		String text = "কোনো  শেষ ম্যাচের আগেই অস্ট্রেলিয়ান অধিনায়ক স্মিথ বলেছিলেন, বিশেষ  শেষ  ‘ওদের ব্যাটিং তো ভয়ংকর, বিশেষ করে বিরাট কোহলি।’ ওদের মানে ভারত।";
 		NGramAnalyzer analyzer = new NGramAnalyzer(new StringReader(text), 2, 3);
 
-		List<String> ngrams = analyzer.getNGramTokens();
+		//List<String> ngrams = analyzer.getNGramTokens();
 		analyzer.close();
 
 		/*

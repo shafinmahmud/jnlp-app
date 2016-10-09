@@ -8,7 +8,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import shafin.nlp.analyzer.NGramCandidate;
 import shafin.nlp.analyzer.VerbSuffixFilter;
 import shafin.nlp.corpus.model.Document;
@@ -49,8 +48,6 @@ public class NGramRanking {
 		while (fileIterator.hasNext()) {
 			File jsonFile = new File(fileIterator.next());
 			
-			MaxentTagger tagger = new MaxentTagger("taggers/bengaliModelFile.tagger");
-			
 			if (jsonFile.getName().endsWith(".json")) {
 
 				JsonProcessor processor = new JsonProcessor(jsonFile);
@@ -75,7 +72,7 @@ public class NGramRanking {
 				 * remove candidates having verb-suffix at the beginning and
 				 * ending.
 				 */
-				List<String> fCandidates = VerbSuffixFilter.filterVerbSuffixCandidates(text, sCandidates, tagger);
+				List<String> fCandidates = VerbSuffixFilter.filterVerbSuffixCandidates(text, sCandidates);
 				COURPUS_PHRASE.add(fCandidates);
 
 				System.out.println(i++ +" : "+jsonFile.getName()+" sentence: " + sentenceTokens.size() + " candidates: " + sCandidates.size() + " ");
