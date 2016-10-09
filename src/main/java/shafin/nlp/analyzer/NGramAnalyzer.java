@@ -72,7 +72,7 @@ public class NGramAnalyzer extends Analyzer {
 		tokenStream.reset();
 		while (tokenStream.incrementToken()) {
 			String term = charTermAttribute.toString();
-			nGramTokens.add(term);
+			nGramTokens.add(term.trim());
 		}
 		return nGramTokens;
 	}

@@ -10,6 +10,10 @@ import shafin.nlp.util.RegexUtil;
 
 public class FeatureExtractor {
 
+	private static final String BOUNDARY = "\\s|\\(|\\)|\\.|\\'|\"|!|,|\\?|;";
+	public static final String WORD_BOUNDARY_START = "(^|"+BOUNDARY+")";
+	public static final String WORD_BOUNDARY_END = "($|"+BOUNDARY+")";
+	
 	public static final String NON_WORD_FORMING_CHARS_REGEX = "[.,’‘';:\\(\\)\\/\\s]+";
 
 	public static int getOccurrenceOrderInSentence(LinkedList<String> sentences, String phrase) {
@@ -23,7 +27,7 @@ public class FeatureExtractor {
 	}
 
 	public static int getTermOccurrenceCount(String text, String term){
-		String wildPhrase = getWildPhraseRegex(term);
+		String wildPhrase = WORD_BOUNDARY_START+getWildPhraseRegex(term)+WORD_BOUNDARY_END;
 		return RegexUtil.countMatches(text, wildPhrase);	
 	}
 	
@@ -56,6 +60,7 @@ public class FeatureExtractor {
 		return SP;
 	}
 
+	
 	public static double getPhraseFirstOccurrence(String text, String phrase) {
 
 		int SP = 0;
@@ -71,11 +76,9 @@ public class FeatureExtractor {
 	}
 
 	public static void main(String[] args) {
-		String text = "ম্যাচের আগেই অস্ট্রেলিয়ান অধিনায়ক স্মিথ বলেছিলেন, ‘ওদের ব্যাটিং তো ভয়ংকর, বিশেষ করে বিরাট কোহলি।’ ওদের মানে ভারত।"
-				+ "সেই ভারতের ব্যাটিং নিয়ে কথা বলতে গিয়ে স্মিথ কেন আলাদা করে কোহলির নামটা বলেছিলেন, ম্যাচ শেষে মনে হয় তা বুঝে গেছেন সবাই। মোহালির আইএস বিন্দ্রা স্টেডিয়ামে কাল ভারত তো আসলে"
-				+ "শুধু নামেই অস্ট্রেলিয়ার প্রতিপক্ষ ছিল। খেললেন তো কোহলিই। ৫১ বলে অপরাজিত ৮২ রানের অসাধারণ এক ইনিংস। অধিনায়ক স্টিভেন স্কোরকার্ড বলছে, ১৬০ রান করেও অস্ট্রেলিয়া ৬ উইকেটে হেরেছে ভারতের কাছে।"
-				+ "কিন্তু আসলে তো হারটা কোহলির কাছেই!কোহলির ব্যাটে ভর করে পাওয়া এই দুর্দান্ত জয়ে টি-টোয়েন্টি বিশ্বকাপের সেমিফাইনালেও পৌঁছে গেছে ভারত। শেষ চারে ৩১ মার্চ মুম্বাইয়ে ধোনির দলের প্রতিপক্ষ ওয়েস্ট ইন্ডিজ।";
-		String phrase = "অধিনায়ক স্টিভেন";
-		System.out.println(getPhraseFirstOccurrence(text, phrase));
+		String text = "শেষ ম্যাচের আগেই অস্ট্রেলিয়ান অধিনায়ক স্মিথ বলেছিলেন, বিশেষ  শেষ  ‘ওদের ব্যাটিং তো ভয়ংকর, বিশেষ করে বিরাট কোহলি।’ ওদের মানে ভারত।";
+				
+		String phrase = "শেষ ";
+		System.out.println(getTermOccurrenceCount(text, phrase));
 	}
 }

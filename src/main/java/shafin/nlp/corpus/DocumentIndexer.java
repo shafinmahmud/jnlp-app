@@ -19,6 +19,7 @@ import shafin.nlp.analyzer.NGramAnalyzer;
 import shafin.nlp.db.IndexService;
 import shafin.nlp.db.TermIndex;
 import shafin.nlp.pfo.FeatureExtractor;
+import shafin.nlp.tokenizer.BnStopWordFilter;
 import shafin.nlp.tokenizer.SentenceSpliter;
 import shafin.nlp.util.FileHandler;
 import shafin.nlp.util.JsonProcessor;
@@ -43,12 +44,14 @@ public class DocumentIndexer {
 	private final int MIN_NGRAM = 2;
 	private final int MAX_NGRAM = 3;
 
+	private final BnStopWordFilter stopWordFilter;
 	private final IndexService indexService;
 
 	public DocumentIndexer(String corpusDir, boolean enableNGramTokenize) throws IOException {
 		this.NGRAM_FLAG = enableNGramTokenize;
 		this.CORPUS_DIRECTORY = corpusDir;
 		this.indexService = new IndexService();
+		this.stopWordFilter = new BnStopWordFilter();
 	}
 
 	public void iterAndIndexDocuments() throws JsonParseException, JsonMappingException, IOException {
@@ -96,18 +99,24 @@ public class DocumentIndexer {
 		List<TermIndex> termIndexes = new ArrayList<>();
 
 		for (String token : TOKENS) {
-			int tf = FeatureExtractor.getTermOccurrenceCount(TEXT, token);
-			int ps = FeatureExtractor.getOccurrenceOrderInSentence(SENTENCES, token);
+			/*
+			 * filter NGram for removing tokens starts or ends with stop-words
+			 */
+			if (!this.stopWordFilter.doesContainStopWordInBoundary(token)) {
+				
+				int tf = FeatureExtractor.getTermOccurrenceCount(TEXT, token);
+				int ps = FeatureExtractor.getOccurrenceOrderInSentence(SENTENCES, token);
 
-			TermIndex index = new TermIndex(docID);
-			index.setTerm(token);
-			index.setTf(tf);
-			index.setPs(ps);
+				TermIndex index = new TermIndex(docID);
+				index.setTerm(token);
+				index.setTf(tf);
+				index.setPs(ps);
 
-			if (tf < 1) {
-				indexService.enlistAsDiscardedTerm(index);
-			} else {
-				termIndexes.add(index);
+				if (tf < 1) {
+					indexService.enlistAsDiscardedTerm(index);
+				} else {
+					termIndexes.add(index);
+				}
 			}
 		}
 

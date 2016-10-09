@@ -16,7 +16,7 @@ import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
  */
 public class NoneWordTokenFilter extends TokenFilter {
 
-	public static final String ALPHABETIC_CHAR_CAPTURING_REGEX = "[^.।,`~!@#$%^&*()_\\-+=\\|{}\\[\\]'\";:\\/\\?<>‘’—\\s]+";
+	public static final String TOKEN_BOUNDARY = "[^.।,`~!@#$%^&*()_\\-+=\\|{}\\[\\]'\";:\\/\\?<>‘’—৷\\s–]+";
 
 	/*
 	 * The constructor for our custom token filter just calls the TokenFilter
@@ -63,11 +63,12 @@ public class NoneWordTokenFilter extends TokenFilter {
 
 			// Get text of the current token and remove any
 			// leading/trailing whitespace.
-			String currentTokenInStream = this.input.getAttribute(CharTermAttribute.class).toString();
+			String currentTokenInStream = trimToTokenBoundary(
+					this.input.getAttribute(CharTermAttribute.class).toString());
 
 			// Save the token if it is not an empty string
-			if (currentTokenInStream.length() > 0 && doesContainAlphaNumeric(currentTokenInStream)){
-					nextToken = currentTokenInStream;
+			if (currentTokenInStream.length() > 0) {
+				nextToken = currentTokenInStream;
 			}
 		}
 
@@ -77,13 +78,13 @@ public class NoneWordTokenFilter extends TokenFilter {
 		return true;
 	}
 
-	public static boolean doesContainAlphaNumeric(String text) {
-		Pattern pattern = Pattern.compile(ALPHABETIC_CHAR_CAPTURING_REGEX);
-		Matcher matcher = pattern.matcher(text);
+	public static String trimToTokenBoundary(String token) {
+		Pattern pattern = Pattern.compile(TOKEN_BOUNDARY + ".*" + TOKEN_BOUNDARY);
+		Matcher matcher = pattern.matcher(token);
 		if (matcher.find()) {
-			return true;
-		} else {
-			return false;
+			return matcher.group(0);
 		}
+		return "";
 	}
+
 }
