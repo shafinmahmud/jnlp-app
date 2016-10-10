@@ -1,68 +1,71 @@
 package shafin.nlp.pos;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.ling.TaggedWord;
+import edu.stanford.nlp.objectbank.TokenizerFactory;
+import edu.stanford.nlp.process.CoreLabelTokenFactory;
+import edu.stanford.nlp.process.DocumentPreprocessor;
+import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 
 public class PosTagger {
 
 	private static final String TAGGER_MODEL = "taggers/bengaliModelFile.tagger";
-	private static final String[] VERB_TAG_LIST = { "/VM", "/VAUX" };
+	private static final String[] VERB_TAG_LIST = { "VM", "VAUX" };
 
 	private final MaxentTagger TAGGER;
-	private  String TEXT;
+	private final TokenizerFactory<CoreLabel> ptbTokenizerFactory;
+	private String TEXT;
 
 	public PosTagger(String text) throws ClassNotFoundException, IOException {
 		this.TAGGER = new MaxentTagger(TAGGER_MODEL);
+		this.ptbTokenizerFactory = PTBTokenizer.factory(new CoreLabelTokenFactory(), "untokenizable=noneKeep");
 		this.TEXT = text;
 	}
-	
+
 	public PosTagger() throws ClassNotFoundException, IOException {
 		this.TAGGER = new MaxentTagger(TAGGER_MODEL);
+		this.ptbTokenizerFactory = PTBTokenizer.factory(new CoreLabelTokenFactory(), "untokenizable=noneKeep");
 	}
 
 	public void setTEXT(String tEXT) {
 		TEXT = tEXT;
 	}
 
-	public String getPosTagged(){
-		return TAGGER.tagString(this.TEXT);
+	public List<TaggedWord> getPosTaggedWords() {
+		DocumentPreprocessor documentPreprocessor = new DocumentPreprocessor(new StringReader(TEXT));
+		documentPreprocessor.setTokenizerFactory(ptbTokenizerFactory);
+
+		List<TaggedWord> taggedWords = new ArrayList<>();
+		for (List<HasWord> sentence : documentPreprocessor) {
+			List<TaggedWord> tSentence = this.TAGGER.tagSentence(sentence);
+			taggedWords.addAll(tSentence);
+		}
+		return taggedWords;
 	}
 
-	public List<String> findTaggedTokens(final String[] TAG_LIST){
-		String taggedText = this.TAGGER.tagString(this.TEXT);
-
+	public List<String> findTaggedTokens(final String[] TAG_LIST) {
 		List<String> filteredTokens = new ArrayList<>();
-		String[] tokens = taggedText.split(" ");
-
-		for (String token : tokens) {
-			token = token.trim();	
-			for(String tag: TAG_LIST){
-				if (token.endsWith(tag)) {
-					filteredTokens.add(token.split("/")[0]);
+		List<TaggedWord> taggedWords = getPosTaggedWords();
+		for (TaggedWord taggedWord : taggedWords) {
+			
+			for (String tag : TAG_LIST) {			
+				if (taggedWord.tag().equals(tag)) {
+					filteredTokens.add(taggedWord.word());
 				}
-			}				
+			}
 		}
 		return filteredTokens;
 	}
 
-	public List<String> findVerbTaggedTokens(){
-		String taggedText = this.TAGGER.tagString(this.TEXT);
-
-		List<String> filteredTokens = new ArrayList<>();
-		String[] tokens = taggedText.split(" ");
-
-		for (String token : tokens) {
-			token = token.trim();	
-			for(String tag: VERB_TAG_LIST){
-				if (token.endsWith(tag)) {
-					filteredTokens.add(token.split("/")[0]);
-				}
-			}				
-		}
-		return filteredTokens;
+	public List<String> findVerbTaggedTokens() {
+		return findTaggedTokens(VERB_TAG_LIST);
 	}
 
 	public static void main(String[] args) throws ClassNotFoundException, IOException {
@@ -73,7 +76,7 @@ public class PosTagger {
 
 		// Output the result
 		PosTagger posTagger = new PosTagger(sample);
-		System.out.println(posTagger.getPosTagged());
+		// System.out.println(posTagger.getPosTaggedWords());
 		System.out.println(posTagger.findVerbTaggedTokens());
 	}
 }

@@ -32,7 +32,8 @@ public class DWSpider {
 		List<String> excludeStrings = new ArrayList<>();
 		excludeStrings.add("m.dw.com");
 		excludeStrings.add("/search/");
-		excludeStrings.add("/মিডিয়া-সেন্টার/মাল্টিমিডিয়া/");
+		excludeStrings.add("/মিডিয়া-সেন্টার/");
+		excludeStrings.add("/overlay/media/");
 		
 		/*
 		 * This is the folder path for Data storage and state storing

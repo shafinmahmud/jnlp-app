@@ -12,7 +12,9 @@ public class SQLiteDBConn extends DBConn{
 	private static final String DATABASE_URL = "jdbc:sqlite:/home/dw/indx/corpus.sqlite";
 	private static final String DRIVER_CLASS = "org.sqlite.JDBC";
 	
-	public static final String DISCARDED_FILE = "/home/dw/indx/zero_freq_terms.txt";
+	public static final String ZERO_FREQ_FILE = "/home/dw/indx/zero_freq_terms.txt";
+	public static final String STOP_FILTERED_FILE = "/home/dw/indx/stop_filtered_terms.txt";
+	public static final String VERBSUFX_FILTERED_FILE = "/home/dw/indx/verbsuffx_filtered_terms.txt";
 
 
 	public static SQLiteDBConn getSQLiteDBConn() {

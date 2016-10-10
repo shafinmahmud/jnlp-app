@@ -1,9 +1,14 @@
 package shafin.nlp.corpus.model;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 
+import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.JsonMappingException;
+
+import shafin.nlp.util.JsonProcessor;
 
 /* This is decided to use for articles from dw.com*/
 public class Document implements Serializable {
@@ -137,6 +142,11 @@ public class Document implements Serializable {
 				+ title + "\ndate : " + date + "\nwritter : " + writter + "\ncategories : " + categories
 				+ "\nmanualKeyphrases : " + manualKeyphrases.toString() + "\nautomaticKeyphrases : "
 				+ automaticKeyphrases.toString() + "\narticle : " + article;
+	}
+	
+	public String toJsonString() throws JsonGenerationException, JsonMappingException, IOException{
+		JsonProcessor processor = new JsonProcessor();
+		return processor.convertToJson(this);
 	}
 
 }

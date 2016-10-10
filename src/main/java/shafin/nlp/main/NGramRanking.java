@@ -9,12 +9,12 @@ import java.util.List;
 import java.util.Map;
 
 import shafin.nlp.analyzer.NGramCandidate;
-import shafin.nlp.analyzer.VerbSuffixFilter;
 import shafin.nlp.corpus.model.Document;
 import shafin.nlp.pfo.PhraseFirstOccurrenceHelper;
 import shafin.nlp.stemmer.StemmerHelper;
 import shafin.nlp.tfidf.TFIDFHelper;
 import shafin.nlp.tokenizer.SentenceSpliter;
+import shafin.nlp.tokenizer.VerbSuffixFilter;
 import shafin.nlp.util.FMeasure;
 import shafin.nlp.util.FileHandler;
 import shafin.nlp.util.JsonProcessor;
@@ -72,7 +72,9 @@ public class NGramRanking {
 				 * remove candidates having verb-suffix at the beginning and
 				 * ending.
 				 */
-				List<String> fCandidates = VerbSuffixFilter.filterVerbSuffixCandidates(text, sCandidates);
+				
+				VerbSuffixFilter verbSuffixFilter = new VerbSuffixFilter();
+				List<String> fCandidates = verbSuffixFilter.filterVerbSuffixCandidates(text, sCandidates);
 				COURPUS_PHRASE.add(fCandidates);
 
 				System.out.println(i++ +" : "+jsonFile.getName()+" sentence: " + sentenceTokens.size() + " candidates: " + sCandidates.size() + " ");

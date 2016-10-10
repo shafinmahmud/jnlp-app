@@ -14,6 +14,7 @@ public class TermIndex {
 	private int tf;
 	private int df;
 	private int ps;
+	private boolean isManual;
 
 	public TermIndex(int docId) {
 		this.docId = docId;
@@ -53,6 +54,14 @@ public class TermIndex {
 
 	public void setPs(int ps) {
 		this.ps = ps;
+	}
+
+	public boolean isManual() {
+		return isManual;
+	}
+
+	public void setManual(boolean isManual) {
+		this.isManual = isManual;
 	}
 
 	public String toJsonString() throws JsonGenerationException, JsonMappingException, IOException{

@@ -16,11 +16,13 @@ import org.codehaus.jackson.map.JsonMappingException;
 
 import shafin.nlp.analyzer.BanglaWordAnalyzer;
 import shafin.nlp.analyzer.NGramAnalyzer;
+import shafin.nlp.corpus.model.Document;
 import shafin.nlp.db.IndexService;
 import shafin.nlp.db.TermIndex;
 import shafin.nlp.pfo.FeatureExtractor;
 import shafin.nlp.tokenizer.BnStopWordFilter;
 import shafin.nlp.tokenizer.SentenceSpliter;
+import shafin.nlp.tokenizer.VerbSuffixFilter;
 import shafin.nlp.util.FileHandler;
 import shafin.nlp.util.JsonProcessor;
 import shafin.nlp.util.Logger;
@@ -38,7 +40,11 @@ public class DocumentIndexer {
 	public static final String CONTENT = "content";
 	public static final String POSITION = "position";
 
+	public static final int DOC_CRITERIA_SENTENCE_NUM = 30;
+	public static final int DOC_CRITERIA_MKP_NUM = 5;
+
 	private final String CORPUS_DIRECTORY;
+	private final String TRAIN_DIRECTORY;
 	private final String EXTENSION = ".json";
 
 	private final boolean NGRAM_FLAG;
@@ -46,13 +52,24 @@ public class DocumentIndexer {
 	private final int MAX_NGRAM = 3;
 
 	private final BnStopWordFilter stopWordFilter;
+	private final VerbSuffixFilter verbSuffixFilter;
+
 	private final IndexService indexService;
 
-	public DocumentIndexer(String corpusDir, boolean enableNGramTokenize) throws IOException {
+	public DocumentIndexer(String corpusDir, boolean enableNGramTokenize) throws IOException, ClassNotFoundException {
 		this.NGRAM_FLAG = enableNGramTokenize;
+
 		this.CORPUS_DIRECTORY = corpusDir;
+		this.TRAIN_DIRECTORY = (corpusDir.endsWith("/") || corpusDir.endsWith("\\")) ? corpusDir + "train/"
+				: corpusDir + "/train/";
+		File dir = new File(TRAIN_DIRECTORY);
+		if (!dir.exists()) {
+			dir.mkdirs();
+		}
+
 		this.indexService = new IndexService();
 		this.stopWordFilter = new BnStopWordFilter();
+		this.verbSuffixFilter = new VerbSuffixFilter();
 	}
 
 	public void iterAndIndexDocuments() throws JsonParseException, JsonMappingException, IOException {
@@ -63,27 +80,93 @@ public class DocumentIndexer {
 			if (filePath.endsWith(EXTENSION)) {
 
 				String fileName = FileHandler.getFileNameFromPathString(filePath);
-				String docID = RegexUtil.getFirstMatch(fileName, "[0-9]+");
+				int docID = Integer.valueOf(RegexUtil.getFirstMatch(fileName, "[0-9]+"));
 
 				Logger.print("INDEXING : " + filePath);
 				JsonProcessor jsonProcessor = new JsonProcessor(new File(filePath));
-				shafin.nlp.corpus.model.Document document = (shafin.nlp.corpus.model.Document) jsonProcessor
+				Document document = (shafin.nlp.corpus.model.Document) jsonProcessor
 						.convertToModel(shafin.nlp.corpus.model.Document.class);
 
 				String article = StringTool.removeUnicodeSpaceChars(new StringBuilder(document.getArticle()));
+				LinkedList<String> SENTENCES = SentenceSpliter.getSentenceTokenListBn(article);
 
-				if (!article.trim().isEmpty()) {
-					createIndex(Integer.valueOf(docID), article);
+				document = qualifyDocuemnt(document, SENTENCES);
+
+				if (document != null) {
+					createIndex(docID, article, SENTENCES);
+
+					/* Insert the Manual Key-Phrases by extracting features */
+					List<String> manualKP = document.getManualKeyphrases();
+					List<TermIndex> newTerms = new ArrayList<>();
+
+					for (String KP : manualKP) {
+						if (!indexService.isExists(docID, KP)) {
+							TermIndex index = new TermIndex(docID);
+							index.setTerm(KP);
+
+							int tf = FeatureExtractor.getTermOccurrenceCount(article, KP);
+
+							if (tf < 1) {
+								indexService.enlistAsZeroFreqTerm(index);
+							} else {
+								int ps = FeatureExtractor.getOccurrenceOrderInSentence(SENTENCES, KP);
+
+								index.setManual(true);
+								index.setTf(tf);
+								index.setPs(ps);
+								newTerms.add(index);
+							}
+
+						} else {
+							indexService.setAsManualKP(docID, KP);
+						}
+					}
+
+					indexService.batchInsertIndex(newTerms);
+					indexService.writeDocumentToDisk(document, TRAIN_DIRECTORY + fileName + ".json");
+
+				} else {
+					Logger.print("DISQUALIFIED : " + filePath);
 				}
 			}
 		}
 		indexService.updateDF();
 	}
 
-	private void createIndex(final int docID, final String TEXT) throws IOException {
-		LinkedList<String> SENTENCES = SentenceSpliter.getSentenceTokenListBn(TEXT);
-		Set<String> TOKENS = new HashSet<>();
+	/*
+	 * DOC CRITERIA 1: Document has to contains at least 30 Sentences; DOC
+	 * CRITERIA 2: All Manual KP must have minimum Term-Frequency 1. If not then
+	 * the certain KP will be discarded. DOC CRITERIA 3: Remaining number of KP
+	 * has to be minimum 5.
+	 */
+	private Document qualifyDocuemnt(Document doc, LinkedList<String> SENTENCES) {
+		if (doc.getArticle().trim().isEmpty()) {
+			return null;
+		}
 
+		if (SENTENCES.size() < DOC_CRITERIA_SENTENCE_NUM) {
+			return null;
+		}
+
+		List<String> manualKP = doc.getManualKeyphrases();
+		List<String> trueKP = new ArrayList<>();
+		for (String KP : manualKP) {
+			int freq = FeatureExtractor.getTermOccurrenceCount(doc.getArticle(), KP);
+			if (freq > 0) {
+				trueKP.add(KP);
+			}
+		}
+
+		if (trueKP.size() < DOC_CRITERIA_MKP_NUM) {
+			return null;
+		}
+
+		doc.setManualKeyphrases(trueKP);
+		return doc;
+	}
+
+	private void createIndex(final int docID, final String TEXT, LinkedList<String> SENTENCES) throws IOException {
+		Set<String> TOKENS = new HashSet<>();
 		for (String sentence : SENTENCES) {
 
 			if (NGRAM_FLAG) {
@@ -100,24 +183,33 @@ public class DocumentIndexer {
 		List<TermIndex> termIndexes = new ArrayList<>();
 
 		for (String token : TOKENS) {
+			TermIndex index = new TermIndex(docID);
+			index.setTerm(token);
 			/*
 			 * filter NGram for removing tokens starts or ends with stop-words
+			 * filter NGram for removing tokens start or ends with suffixed
+			 * verbs
 			 */
 			if (!this.stopWordFilter.doesContainStopWordInBoundary(token)) {
+				if (!this.verbSuffixFilter.doesStartOrEndsWithVerbSuffix(token)) {
 
-				int tf = FeatureExtractor.getTermOccurrenceCount(TEXT, token);
-				int ps = FeatureExtractor.getOccurrenceOrderInSentence(SENTENCES, token);
+					int tf = FeatureExtractor.getTermOccurrenceCount(TEXT, token);
+					index.setTf(tf);
+					index.setManual(false);
 
-				TermIndex index = new TermIndex(docID);
-				index.setTerm(token);
-				index.setTf(tf);
-				index.setPs(ps);
+					if (tf < 1) {
+						indexService.enlistAsZeroFreqTerm(index);
+					} else {
+						int ps = FeatureExtractor.getOccurrenceOrderInSentence(SENTENCES, token);
+						index.setPs(ps);
 
-				if (tf < 1) {
-					indexService.enlistAsDiscardedTerm(index);
+						termIndexes.add(index);
+					}
 				} else {
-					termIndexes.add(index);
+					indexService.enlistAsVerbSuffixedTerm(index);
 				}
+			} else {
+				indexService.enlistAsStopWordContainedTerm(index);
 			}
 		}
 
@@ -169,7 +261,7 @@ public class DocumentIndexer {
 		}
 	}
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, ClassNotFoundException {
 		String path = "D:/home/dw/json/test/";
 		DocumentIndexer indexer = new DocumentIndexer(path, true);
 		indexer.iterAndIndexDocuments();

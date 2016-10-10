@@ -1,9 +1,11 @@
-package shafin.nlp.analyzer;
+package shafin.nlp.tokenizer;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import shafin.nlp.analyzer.BanglaWordAnalyzer;
 import shafin.nlp.pos.PosTagger;
 
 public class VerbSuffixFilter {
@@ -16,19 +18,13 @@ public class VerbSuffixFilter {
 	private final static String[] VERB_SUFFIX_5 = { " িতেছি ", "ছিলাম", "ছিলেন", "েছিলে", "েছিলি" };
 	private final static String[] VERB_SUFFIX_6 = { "েছিলাম", "েছিলেন" };
 
-	public static List<String> getSuffixedVerbTokens(String text) throws ClassNotFoundException, IOException {
-		List<String> suffixedVerbsToken = new ArrayList<>();
-		PosTagger posTagger = new PosTagger(text);
-		List<String> verbTokens = posTagger.findVerbTaggedTokens();
-		for (String verb : verbTokens) {
-			if (matchSuffix(verb)) {
-				suffixedVerbsToken.add(verb);
-			}
-		}
-		return suffixedVerbsToken;
+	private final PosTagger posTagger;
+	
+	public VerbSuffixFilter() throws ClassNotFoundException, IOException {
+		this.posTagger = new PosTagger();
 	}
 
-	public static boolean matchSuffix(String token) {
+	private static boolean containsVerbSuffix(String token) {
 
 		String lastCharSubs = token.length() > 1 ? token.substring(token.length() - 1) : token.substring(0);
 		String secondLastCharSubs = token.length() > 2 ? token.substring(token.length() - 2) : token.substring(0);
@@ -58,10 +54,32 @@ public class VerbSuffixFilter {
 		return false;
 	}
 
-	public static List<String> filterVerbSuffixCandidates(String text, List<String> candidates)
+	@Deprecated
+	public  List<String> getSuffixedVerbTokens(String text) throws ClassNotFoundException, IOException {
+		List<String> suffixedVerbsToken = new ArrayList<>();
+		this.posTagger.setTEXT(text);
+
+		List<String> verbTokens = posTagger.findVerbTaggedTokens();
+		for (String verb : verbTokens) {
+			if (containsVerbSuffix(verb)) {
+				suffixedVerbsToken.add(verb);
+			}
+		}
+		return suffixedVerbsToken;
+	}
+	
+	public boolean isVerbToken(String token){
+		this.posTagger.setTEXT(token);
+		List<String> verbs = posTagger.findVerbTaggedTokens();
+		return !verbs.isEmpty();
+	}
+	
+	@Deprecated
+	public List<String> filterVerbSuffixCandidates(String text, List<String> candidates)
 			throws ClassNotFoundException, IOException {
 		List<String> filteredList = new ArrayList<>();
 		List<String> itchyVerbs = getSuffixedVerbTokens(text);
+		
 		for (String candidate : candidates) {
 			for (String itchy : itchyVerbs) {
 				if (!candidate.startsWith(itchy) && !candidate.endsWith(itchy)) {
@@ -71,16 +89,34 @@ public class VerbSuffixFilter {
 		}
 		return filteredList;
 	}
+	
+	public boolean doesStartOrEndsWithVerbSuffix(String token){
+		BanglaWordAnalyzer wordAnalyzer = new BanglaWordAnalyzer(new StringReader(token));
+		List<String> wordTokens = wordAnalyzer.getTokenList();
+		wordAnalyzer.close();
+
+		int size = wordTokens.size();
+		if (size > 0) {
+			String firstWord = wordTokens.get(0);
+			String lastWord = wordTokens.get(size - 1);
+			
+			if(isVerbToken(firstWord) && containsVerbSuffix(firstWord)){
+				return true;
+			}
+			
+			if(isVerbToken(lastWord) && containsVerbSuffix(lastWord)){
+				return true;
+			}
+			
+			return false;
+		}
+
+		return true;
+	}
 
 	public static void main(String[] args) throws ClassNotFoundException, IOException {
-		String text = "ভারতীয় টেলিভিশনের জনপ্রিয় ধারাবাহিক ‘বালিকা বধূ’র পরিচিত মুখ বাঙালি অভিনেত্রী প্রত্যুষা বন্দ্যোপাধ্যায়ের মৃত্যুর "
-				+ " সঙ্গে নিজের সম্পৃক্ততার কথা অস্বীকার করেছেন তাঁর প্রেমিক অভিনেতা-প্রযোজক রাহুল রাজ সিং। তিনি বলেন, প্রত্যুষাকে বিয়ের জন্য প্রস্তুতিও নিচ্ছিলেন।"
-				+ "আজ রোববার এনডিটিভি অনলাইনের এক প্রতিবেদনে বলা হয়েছে, প্রাথমিক জিজ্ঞাসাবাদে পুলিশের কাছে এমনটাই দাবি করেছেন প্রত্যুষার প্রেমিক রাহুল রাজ।";
-		List<String> sample = getSuffixedVerbTokens(text);
-
-		System.out.println(text);
-		for (String token : sample) {
-			System.out.println(token);
-		}
+		VerbSuffixFilter filter = new VerbSuffixFilter();
+		String token  = " এমনটাই দাবি করেছেন";
+		System.out.println(token+" : "+filter.doesStartOrEndsWithVerbSuffix(token));
 	}
 }
