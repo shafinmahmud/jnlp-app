@@ -78,8 +78,8 @@ public class Spider {
 							System.out.println("INSERTING: " + ++counter + " Q[" + this.urlQueue.size() + "] " + url);
 							FileHandler.appendFile(STORAGE_PATH, url + "\n");
 						} else {
-							// System.out.println("EXISTING: " + counter + " Q["
-							// + this.urlQueue.size() + "] " + url);
+							 System.out.println("EXISTING: " + counter + " Q["
+							 + this.urlQueue.size() + "] " + url);
 						}
 					}
 				} catch (HttpStatusException e) {

@@ -34,6 +34,7 @@ public class DWSpider {
 		excludeStrings.add("/search/");
 		excludeStrings.add("/মিডিয়া-সেন্টার/");
 		excludeStrings.add("/overlay/media/");
+		excludeStrings.add("/bn/gelöscht/");
 		
 		/*
 		 * This is the folder path for Data storage and state storing

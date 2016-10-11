@@ -36,16 +36,10 @@ import shafin.nlp.util.StringTool;
  */
 public class DocumentIndexer {
 
-	public static final String ID = "id";
-	public static final String CONTENT = "content";
-	public static final String POSITION = "position";
-
-	public static final int DOC_CRITERIA_SENTENCE_NUM = 30;
-	public static final int DOC_CRITERIA_MKP_NUM = 5;
-
 	private final String CORPUS_DIRECTORY;
-	private final String TRAIN_DIRECTORY;
 	private final String EXTENSION = ".json";
+
+	private final boolean RECREATE_FLAG;
 
 	private final boolean NGRAM_FLAG;
 	private final int MIN_NGRAM = 2;
@@ -56,16 +50,12 @@ public class DocumentIndexer {
 
 	private final IndexService indexService;
 
-	public DocumentIndexer(String corpusDir, boolean enableNGramTokenize) throws IOException, ClassNotFoundException {
+	public DocumentIndexer(String corpusDir, boolean enableNGramTokenize, boolean willRecreate)
+			throws IOException, ClassNotFoundException {
 		this.NGRAM_FLAG = enableNGramTokenize;
+		this.RECREATE_FLAG = willRecreate;
 
 		this.CORPUS_DIRECTORY = corpusDir;
-		this.TRAIN_DIRECTORY = (corpusDir.endsWith("/") || corpusDir.endsWith("\\")) ? corpusDir + "train/"
-				: corpusDir + "/train/";
-		File dir = new File(TRAIN_DIRECTORY);
-		if (!dir.exists()) {
-			dir.mkdirs();
-		}
 
 		this.indexService = new IndexService();
 		this.stopWordFilter = new BnStopWordFilter();
@@ -73,7 +63,9 @@ public class DocumentIndexer {
 	}
 
 	public void iterAndIndexDocuments() throws JsonParseException, JsonMappingException, IOException {
-		indexService.recreatIndex();
+		if (RECREATE_FLAG) {
+			indexService.recreatIndex();
+		}
 
 		List<String> filePaths = FileHandler.getRecursiveFileList(CORPUS_DIRECTORY);
 		for (String filePath : filePaths) {
@@ -90,79 +82,41 @@ public class DocumentIndexer {
 				String article = StringTool.removeUnicodeSpaceChars(new StringBuilder(document.getArticle()));
 				LinkedList<String> SENTENCES = SentenceSpliter.getSentenceTokenListBn(article);
 
-				document = qualifyDocuemnt(document, SENTENCES);
+				createIndex(docID, article, SENTENCES);
 
-				if (document != null) {
-					createIndex(docID, article, SENTENCES);
+				/* Insert the Manual Key-Phrases by extracting features */
+				List<String> manualKP = document.getManualKeyphrases();
+				List<TermIndex> newTerms = new ArrayList<>();
 
-					/* Insert the Manual Key-Phrases by extracting features */
-					List<String> manualKP = document.getManualKeyphrases();
-					List<TermIndex> newTerms = new ArrayList<>();
+				for (String KP : manualKP) {
+					if (!indexService.isExists(docID, KP)) {
+						TermIndex index = new TermIndex(docID);
+						KP = KP.trim();
+						index.setTerm(KP);
 
-					for (String KP : manualKP) {
-						if (!indexService.isExists(docID, KP)) {
-							TermIndex index = new TermIndex(docID);
-							index.setTerm(KP);
+						int tf = FeatureExtractor.getTermOccurrenceCount(article, KP);
 
-							int tf = FeatureExtractor.getTermOccurrenceCount(article, KP);
-
-							if (tf < 1) {
-								indexService.enlistAsZeroFreqTerm(index);
-							} else {
-								int ps = FeatureExtractor.getOccurrenceOrderInSentence(SENTENCES, KP);
-
-								index.setManual(true);
-								index.setTf(tf);
-								index.setPs(ps);
-								newTerms.add(index);
-							}
-
+						if (tf < 1) {
+							indexService.enlistAsZeroFreqTerm(index);
 						} else {
-							indexService.setAsManualKP(docID, KP);
+							int ps = FeatureExtractor.getOccurrenceOrderInSentence(SENTENCES, KP);
+
+							index.setManual(true);
+							index.setTf(tf);
+							index.setPs(ps);
+							newTerms.add(index);
 						}
+
+					} else {
+						indexService.setAsManualKP(docID, KP);
 					}
-
-					indexService.batchInsertIndex(newTerms);
-					indexService.writeDocumentToDisk(document, TRAIN_DIRECTORY + fileName + ".json");
-
-				} else {
-					Logger.print("DISQUALIFIED : " + filePath);
 				}
+
+				indexService.batchInsertIndex(newTerms);
+
 			}
 		}
 		indexService.updateDF();
-	}
-
-	/*
-	 * DOC CRITERIA 1: Document has to contains at least 30 Sentences; DOC
-	 * CRITERIA 2: All Manual KP must have minimum Term-Frequency 1. If not then
-	 * the certain KP will be discarded. DOC CRITERIA 3: Remaining number of KP
-	 * has to be minimum 5.
-	 */
-	private Document qualifyDocuemnt(Document doc, LinkedList<String> SENTENCES) {
-		if (doc.getArticle().trim().isEmpty()) {
-			return null;
-		}
-
-		if (SENTENCES.size() < DOC_CRITERIA_SENTENCE_NUM) {
-			return null;
-		}
-
-		List<String> manualKP = doc.getManualKeyphrases();
-		List<String> trueKP = new ArrayList<>();
-		for (String KP : manualKP) {
-			int freq = FeatureExtractor.getTermOccurrenceCount(doc.getArticle(), KP);
-			if (freq > 0) {
-				trueKP.add(KP);
-			}
-		}
-
-		if (trueKP.size() < DOC_CRITERIA_MKP_NUM) {
-			return null;
-		}
-
-		doc.setManualKeyphrases(trueKP);
-		return doc;
 	}
 
 	private void createIndex(final int docID, final String TEXT, LinkedList<String> SENTENCES) throws IOException {
@@ -262,33 +216,9 @@ public class DocumentIndexer {
 	}
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException {
-		String path = "D:/home/dw/json/test/";
-		DocumentIndexer indexer = new DocumentIndexer(path, true);
+		String path = "D:/home/dw/json/QUALIFIED/A 500";
+		DocumentIndexer indexer = new DocumentIndexer(path, true, true);
 		indexer.iterAndIndexDocuments();
 
-		Map<String, TermValue> values = indexer.getFeatureVector(0);
-		for (Map.Entry<String, TermValue> entry : values.entrySet()) {
-			System.out.println(entry.getKey() + " : " + entry.getValue().toString());
-		}
-
-		/*
-		 * String string =
-		 * "আইএস তাদের সদস্যদের ‘খিলাফতের সৈনিক’ বলে সম্বোধন করে। গুলশান হামলায় জড়িত ও পরে অভিযানে নিহত পাঁচ জঙ্গিকে তারা একই সম্বোধন করে এবং হামলার দায় স্বীকার করে। যদিও বাংলাদেশের আইনশৃঙ্খলা রক্ষাকারী বাহিনীর কর্মকর্তারা বলেছেন, গুলশান হামলায় আইএস নয়, নব্য জেএমবি জড়িত। তামিম চৌধুরী এই নব্য জেএমবির নেতা এবং ১ জুলাই গুলশানের হলি আর্টিজানে হামলার অন্যতম সমন্বয়ক ও পরিকল্পনাকারী। গত ২৭ আগস্ট নারায়ণগঞ্জে জঙ্গিবিরোধী পুলিশের এক অভিযানে তামিম ও তাঁর দুই সহযোগী নিহত হন।"
-		 * ; LinkedList<String> SENTENCES =
-		 * SentenceSpliter.getSentenceTokenListBn(string); Set<String> TOKENS =
-		 * new HashSet<>();
-		 * 
-		 * for(String sentence : SENTENCES){ NGramAnalyzer analyzer = new
-		 * NGramAnalyzer(new StringReader(sentence), 2, 3);
-		 * System.out.println(sentence);
-		 * 
-		 * List<String> list = analyzer.getNGramTokens(); TOKENS.addAll(list);
-		 * 
-		 * analyzer.close(); }
-		 * 
-		 * for(String string2 : TOKENS){ System.out.println(string2 +
-		 * " : "+PhraseFirstOccurrence.getOccurrenceOrderInSentence(SENTENCES,
-		 * string2)); }
-		 */
 	}
 }

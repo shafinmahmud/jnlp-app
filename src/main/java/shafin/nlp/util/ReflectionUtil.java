@@ -59,7 +59,7 @@ public class ReflectionUtil {
 		}
 		return false;
 	}
-	
+
 	public static boolean setListValue(Object object, String fieldName, List<String> fieldValue) {
 		Class<?> clazz = object.getClass();
 		while (clazz != null) {
@@ -78,19 +78,26 @@ public class ReflectionUtil {
 		return false;
 	}
 
-
 	public static Object convertStringToValue(String value, String type) {
 		switch (type) {
 		case "Integer":
+			if (value.equals("null"))
+				value = "0";
 			return Integer.valueOf(value.trim());
 
 		case "Long":
+			if (value.equals("null"))
+				value = "0";
 			return Long.valueOf(value.trim());
 
 		case "Float":
+			if (value.equals("null"))
+				value = "0";
 			return Float.valueOf(value.trim());
 
 		case "Double":
+			if (value.equals("null"))
+				value = "0";
 			return Double.valueOf(value.trim());
 
 		case "String":
@@ -105,11 +112,11 @@ public class ReflectionUtil {
 		// System.out.println(convertStringToValue("211", "Integer"));
 		Class<?> clazz = Document.class;
 		Document instance = (Document) clazz.newInstance();
-		
+
 		List<String> list = new ArrayList<>();
 		list.add("Bangladesh");
 		list.add("Sylhet");
-		
+
 		setListValue(instance, "categories", list);
 		setValue(instance, "writter", "Shafin Mahmud");
 

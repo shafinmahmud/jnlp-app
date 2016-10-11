@@ -10,7 +10,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -54,6 +56,25 @@ public class FileHandler {
 		return fileList;
 	}
 
+	public static List<String> getRecursiveNoneEmptyChildFolders(String path) throws IOException {
+		path = getCanonicalPath(path);
+		List<String> fileList = getRecursiveFileList(path);
+		Set<String> noneEmptyFolders = new HashSet<>();
+		for (String file : fileList) {
+			String parent = new File(file).getParent();
+			if (!parent.equals(path)) {
+				noneEmptyFolders.add(parent);
+			}
+		}
+		return new ArrayList<String>(noneEmptyFolders);
+	}
+
+	public static String getCanonicalPath(String path){
+		path = (path.endsWith("/") | path.endsWith("\\"))
+				? path.replaceAll("[\\|\\/]+(?=[^\\\\/]*$)", "") : path;
+		return path.replace("/", "\\");
+	}
+	
 	public static List<String> readFile(String filePath) {
 
 		List<String> lines = new ArrayList<>();
@@ -224,6 +245,27 @@ public class FileHandler {
 			return false;
 		}
 	}
+	
+	public static boolean moveFile(String filePath, String destinationFolder){
+		File file = new File(filePath);
+		File dir = new File(destinationFolder);
+		if (!file.exists() | file.isDirectory() | !dir.isDirectory()) {
+			throw new IllegalArgumentException("Provide Valid File Folder in Parameter");
+		}
+		
+		if (!dir.exists()) {
+			dir.mkdir();
+		}
+		
+		String newLocation = getCanonicalPath(destinationFolder)+"\\"+file.getName();
+		
+		File newFile = new File(newLocation);
+		if(!newFile.exists()){
+			return file.renameTo(newFile);	
+		}
+		
+		return deleteFile(filePath);
+	}
 
 	public static boolean deleteFile(String filePath) {
 		File file = new File(filePath);
@@ -239,7 +281,7 @@ public class FileHandler {
 			String fileName = filePath.substring(idx + 1);
 			String fileExtension = getFileExtensionFromPathString(filePath);
 			fileName = fileName.replace(fileExtension, "");
-			
+
 			String newFileName = getValidFileName(fileName);
 			return filePath.replace(fileName, newFileName);
 		} else {
@@ -268,6 +310,19 @@ public class FileHandler {
 			throw e;
 		}
 	}
+	
+	public static String getFileNameFromPathStringWithExt(String filePath) {
+		try {
+			int idx = filePath.replaceAll("\\\\", "/").lastIndexOf("/");
+			if (idx >= 0) {
+				String fileName = filePath.substring(idx + 1);
+				return fileName;
+			}
+			return null;
+		} catch (Exception e) {
+			throw e;
+		}
+	}
 
 	public static String getFileExtensionFromPathString(String filePath) {
 		try {
@@ -281,23 +336,21 @@ public class FileHandler {
 			throw e;
 		}
 	}
-	
-	public static String getDirectoryFromFilePathString(String path){
+
+	public static String getDirectoryFromFilePathString(String path) {
 		File file = new File(path);
-		if(!file.isDirectory()){
+		if (!file.isDirectory()) {
 			return file.getParentFile().getAbsolutePath();
 		}
 		return path;
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		// তেলাপোকার দুধ: ভবিষ্যতের ‘সুপারফুড'?
 		// শিশু শরণার্থী: অপরাধীদের সহজ লক্ষ্য
 		// ২০১৬ অলিম্পিক: রিও কি প্রস্তুত?
-		String filePath = "D:/home/dw/data/২০১৬ অলিম্পিক: রিও কি প্রস্তুত?.txt";
-		String validPath = validateFilePathName(filePath);
-		System.out.println("input:  " + filePath);
-		System.out.println("output: " + validPath);
+		String filePath = "D:\\home\\dw\\json\\QUALIFIED";
+		System.out.println(getRecursiveNoneEmptyChildFolders(filePath));
 
 	}
 }

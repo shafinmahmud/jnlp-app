@@ -1,5 +1,6 @@
 package shafin.nlp.corpus;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import java.util.List;
 import shafin.nlp.corpus.model.Document;
 import shafin.nlp.util.FileHandler;
 import shafin.nlp.util.JsonProcessor;
+import shafin.nlp.util.Logger;
 import shafin.nlp.util.ReflectionUtil;
 
 /*
@@ -37,14 +39,20 @@ public class TextToJsonDocument<T> {
 
 		for (String path : filePaths) {
 			String fileName = FileHandler.getFileNameFromPathString(path);
-			
+
 			if (path.endsWith(".txt")) {
-				System.out.println(path);
 				T document = mapTextToObject(path);
-				
+
 				JsonProcessor jsonProcessor = new JsonProcessor();
 				String json = jsonProcessor.convertToJson(document);
-				FileHandler.writeFile(JSON_FILES_DIRECTORY+"/"+fileName+".json", json);
+
+				String filePath = JSON_FILES_DIRECTORY + "/" + fileName + ".json";
+				if (!new File(filePath).exists()) {
+					FileHandler.writeFile(filePath, json);
+					Logger.print("CONVERTED : "+filePath);
+				}else{
+					Logger.print("EXISTS : "+filePath);
+				}
 			}
 		}
 
@@ -60,15 +68,14 @@ public class TextToJsonDocument<T> {
 		for (String line : lines) {
 			line = line.trim();
 			boolean fieldMatched = false;
-			
-			
+
 			for (Field field : fields) {
 				String fieldName = field.getName();
-				
+
 				if (line.startsWith(fieldName)) {
 					fieldMatched = true;
 					lastFieldName = fieldName;
-					
+
 					if (field.getType().getSimpleName().equals("List")) {
 						String valueString = line.replaceFirst("(" + fieldName + "[\\s]*:[\\s]*)", "")
 								.replaceAll("\\[|\\]", "");
@@ -85,12 +92,12 @@ public class TextToJsonDocument<T> {
 					}
 				}
 			}
-			
-			if(!fieldMatched){
+
+			if (!fieldMatched) {
 				Object val = ReflectionUtil.getValue(document, lastFieldName);
-				
-				line = " "+line;
-				ReflectionUtil.setValue(document, lastFieldName, val+line);
+
+				line = " " + line;
+				ReflectionUtil.setValue(document, lastFieldName, val + line);
 			}
 
 		}
