@@ -14,7 +14,7 @@ import java.util.List;
 import shafin.nlp.util.Logger;
 
 public class IndexDao extends BasicDao<TermIndex> {
-	
+
 	public static File zeroFreqFile = new File(SQLiteDBConn.ZERO_FREQ_FILE);
 	public static File stopFilteredFile = new File(SQLiteDBConn.STOP_FILTERED_FILE);
 	public static File verbSuffxFilteredFile = new File(SQLiteDBConn.VERBSUFX_FILTERED_FILE);
@@ -24,7 +24,7 @@ public class IndexDao extends BasicDao<TermIndex> {
 	}
 
 	public void createTable() {
-		
+
 		if (!zeroFreqFile.exists()) {
 			try {
 				zeroFreqFile.createNewFile();
@@ -32,7 +32,7 @@ public class IndexDao extends BasicDao<TermIndex> {
 				e.printStackTrace();
 			}
 		}
-		
+
 		if (!stopFilteredFile.exists()) {
 			try {
 				stopFilteredFile.createNewFile();
@@ -40,7 +40,7 @@ public class IndexDao extends BasicDao<TermIndex> {
 				e.printStackTrace();
 			}
 		}
-		
+
 		if (!verbSuffxFilteredFile.exists()) {
 			try {
 				verbSuffxFilteredFile.createNewFile();
@@ -51,13 +51,10 @@ public class IndexDao extends BasicDao<TermIndex> {
 
 		/* Creating the Query */
 		StringBuilder SQL = new StringBuilder("CREATE TABLE term_index(");
-		SQL.append("doc_id INT NOT NULL,").append(" ")
-				.append("term TEXT NOT NULL,").append(" ")
-				.append("is_manual BOOLEAN NULL,").append(" ")
-				.append("tf INT NOT NULL,").append(" ")
-				.append("df INT NULL,").append(" ")
-				.append("ps INT NOT NULL);")
-				.append("CREATE UNIQUE INDEX idx_term ON term(doc_id,term);");
+		SQL.append("doc_id INT NOT NULL,").append(" ").append("term TEXT NOT NULL,").append(" ")
+				.append("is_manual BOOLEAN NULL,").append(" ").append("is_train BOOLEAN NULL,").append(" ")
+				.append("tf INT NOT NULL,").append(" ").append("df INT NULL,").append(" ")
+				.append("ps DOUBLE NOT NULL);").append("CREATE UNIQUE INDEX idx_term ON term(doc_id,term);");
 
 		Logger.print(SQL.toString());
 
@@ -78,11 +75,11 @@ public class IndexDao extends BasicDao<TermIndex> {
 		if (zeroFreqFile.exists()) {
 			zeroFreqFile.delete();
 		}
-		
+
 		if (stopFilteredFile.exists()) {
 			stopFilteredFile.delete();
 		}
-		
+
 		if (verbSuffxFilteredFile.exists()) {
 			verbSuffxFilteredFile.delete();
 		}
@@ -119,7 +116,7 @@ public class IndexDao extends BasicDao<TermIndex> {
 				term.setManual(rs.getBoolean("is_manual"));
 				term.setTf(rs.getInt("tf"));
 				term.setDf(rs.getInt("df"));
-				term.setPs(rs.getInt("ps"));
+				term.setPs(rs.getDouble("ps"));
 
 				terms.add(term);
 			}
@@ -150,8 +147,8 @@ public class IndexDao extends BasicDao<TermIndex> {
 		}
 		return false;
 	}
-	
-	public boolean updateIsManualKP(int docId, String term, boolean isManual){
+
+	public boolean updateIsManualKP(int docId, String term, boolean isManual) {
 		try {
 			String query = "UPDATE term_index SET is_manual = ? where doc_id = ? and term = ?";
 			this.qs = DB_CONN.getConnection().prepareStatement(query);
@@ -253,14 +250,14 @@ public class IndexDao extends BasicDao<TermIndex> {
 		return 0;
 	}
 
-	public boolean insertTerm(int docId, String term, int tf, int ps) {
+	public boolean insertTerm(int docId, String term, int tf, double ps) {
 		try {
 			String query = "INSERT INTO term_index(doc_id, term, tf, ps) VALUES (?,?,?,?)";
 			this.qs = DB_CONN.getConnection().prepareStatement(query);
 			this.qs.setInt(1, docId);
 			this.qs.setString(2, term);
 			this.qs.setInt(3, tf);
-			this.qs.setInt(4, ps);
+			this.qs.setDouble(4, ps);
 
 			this.DB_CONN.executeQuery(this.qs);
 			Logger.print(query);
@@ -278,8 +275,8 @@ public class IndexDao extends BasicDao<TermIndex> {
 	public boolean insertTermInBatch(List<TermIndex> termIndexes) {
 		try {
 			DB_CONN.getConnection().setAutoCommit(false);
-			
-			String query = "INSERT INTO term_index(doc_id, term, is_manual, tf, ps) VALUES (?,?,?,?,?)";
+
+			String query = "INSERT INTO term_index(doc_id, term, is_manual, is_train, tf, ps) VALUES (?,?,?,?,?,?)";
 			this.qs = DB_CONN.getConnection().prepareStatement(query.toString());
 
 			final int batchSize = 1000;
@@ -289,8 +286,9 @@ public class IndexDao extends BasicDao<TermIndex> {
 				this.qs.setInt(1, index.getDocId());
 				this.qs.setString(2, index.getTerm());
 				this.qs.setBoolean(3, index.isManual());
-				this.qs.setInt(4, index.getTf());
-				this.qs.setInt(5, index.getPs());
+				this.qs.setBoolean(4, index.isTrain());
+				this.qs.setInt(5, index.getTf());
+				this.qs.setDouble(6, index.getPs());
 				this.qs.addBatch();
 
 				if (++count % batchSize == 0) {
@@ -301,7 +299,7 @@ public class IndexDao extends BasicDao<TermIndex> {
 
 			this.qs.executeBatch();
 			this.DB_CONN.getConnection().commit();
-			
+
 			DB_CONN.getConnection().setAutoCommit(true);
 			return true;
 
@@ -336,7 +334,7 @@ public class IndexDao extends BasicDao<TermIndex> {
 		return false;
 	}
 
-	public boolean updateDF() {
+	public boolean updateDF(boolean dataSetType) {
 		Statement statement = null;
 		try {
 			statement = this.DB_CONN.getConnection().createStatement();
@@ -349,22 +347,27 @@ public class IndexDao extends BasicDao<TermIndex> {
 			statement.addBatch("DROP TABLE IF EXISTS _term_index;");
 
 			/* CREATE _temp and _temp_index tables */
-			statement.addBatch("CREATE TABLE _temp(term TEXT, df INT);");
-			statement.addBatch("CREATE TABLE _term_index(doc_id INT NOT NULL,"
-					+ "term TEXT NOT NULL, is_manual BOOLEAN NULL, tf INT NOT NULL,df INT NULL,ps INT NOT NULL);");
+			statement.addBatch("CREATE TABLE _temp(term TEXT, is_train BOOLEAN NOT NULL, df INT);");
+			statement.addBatch("CREATE TABLE _term_index(doc_id INT NOT NULL,term TEXT NOT NULL, "
+					+ "is_manual BOOLEAN NULL,is_train BOOLEAN NULL, "
+					+ "tf INT NOT NULL,df INT NULL,ps DOUBLE NOT NULL);");
 
 			/*
-			 * INSERT _temp the term wise document count and by joing with
+			 * INSERT _temp the term wise document count and by joining with
 			 * term_index saving it to _term_index
 			 */
-			statement.addBatch("INSERT INTO _temp SELECT term, count(doc_id) as df FROM term_index group by term;");
-			statement.addBatch(
-			"INSERT INTO _term_index(doc_id, term, is_manual, tf, df, ps) SELECT i.doc_id, i.term, i.is_manual, i.tf, t.df, i.ps  "
-							+ "FROM term_index  i, _temp t where t.term = i.term;");
+			statement.addBatch("INSERT INTO _temp SELECT term, is_train, count(doc_id) as df "
+					+ "FROM term_index where is_train = 1 group by term;");
+			statement.addBatch("INSERT INTO _temp SELECT term, is_train, count(doc_id) as df "
+					+ "FROM term_index where is_train = 0 group by term;");
+			statement.addBatch("INSERT INTO _term_index(doc_id, term, is_manual, is_train, tf, df, ps) "
+					+ "SELECT i.doc_id, i.term, i.is_manual, i.is_train, i.tf, t.df, i.ps "
+					+ "FROM term_index  i, _temp t where t.term = i.term and i.is_train = t.is_train;");
 
 			/* EMPTY the original term_index and copy from _term_index */
 			statement.addBatch("DELETE FROM term_index;");
-			statement.addBatch("INSERT INTO term_index(doc_id, term, is_manual, tf, df, ps) SELECT * FROM _term_index;");
+			statement.addBatch("INSERT INTO term_index(doc_id, term, is_manual, is_train, tf, df, ps) "
+					+ "SELECT * FROM _term_index;");
 
 			/* DROP Temp tables if exists */
 			statement.addBatch("DROP TABLE IF EXISTS _temp;");

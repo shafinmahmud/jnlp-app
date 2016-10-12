@@ -13,15 +13,12 @@ public class TermIndex {
 	private String term;
 	private int tf;
 	private int df;
-	private int ps;
+	private double ps;
 	private boolean isManual;
+	private boolean isTrain;
 
 	public TermIndex(int docId) {
 		this.docId = docId;
-	}
-
-	public int getDocId() {
-		return docId;
 	}
 
 	public String getTerm() {
@@ -48,11 +45,11 @@ public class TermIndex {
 		this.df = df;
 	}
 
-	public int getPs() {
+	public double getPs() {
 		return ps;
 	}
 
-	public void setPs(int ps) {
+	public void setPs(double ps) {
 		this.ps = ps;
 	}
 
@@ -64,7 +61,19 @@ public class TermIndex {
 		this.isManual = isManual;
 	}
 
-	public String toJsonString() throws JsonGenerationException, JsonMappingException, IOException{
+	public int getDocId() {
+		return docId;
+	}
+
+	public boolean isTrain() {
+		return isTrain;
+	}
+
+	public void setTrain(boolean isTrain) {
+		this.isTrain = isTrain;
+	}
+
+	public String toJsonString() throws JsonGenerationException, JsonMappingException, IOException {
 		JsonProcessor processor = new JsonProcessor();
 		return processor.convertToJson(this);
 	}

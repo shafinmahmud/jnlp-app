@@ -4,15 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 
 import shafin.nlp.analyzer.BanglaWordAnalyzer;
 import shafin.nlp.analyzer.NGramAnalyzer;
@@ -36,7 +31,12 @@ import shafin.nlp.util.StringTool;
  */
 public class DocumentIndexer {
 
-	private final String CORPUS_DIRECTORY;
+	private final String TRAIN_CORPUS_DIRECTORY;
+	private final String TEST_CORPUS_DIRECTORY;
+
+	private final int TRAIN_SET = 5;
+	private final int TEST_SET = 1;
+
 	private final String EXTENSION = ".json";
 
 	private final boolean RECREATE_FLAG;
@@ -50,31 +50,39 @@ public class DocumentIndexer {
 
 	private final IndexService indexService;
 
-	public DocumentIndexer(String corpusDir, boolean enableNGramTokenize, boolean willRecreate)
+	public DocumentIndexer(String trainDir, String testDir, boolean enableNGramTokenize, boolean willRecreate)
 			throws IOException, ClassNotFoundException {
 		this.NGRAM_FLAG = enableNGramTokenize;
 		this.RECREATE_FLAG = willRecreate;
 
-		this.CORPUS_DIRECTORY = corpusDir;
+		this.TRAIN_CORPUS_DIRECTORY = trainDir;
+		this.TEST_CORPUS_DIRECTORY = testDir;
 
 		this.indexService = new IndexService();
 		this.stopWordFilter = new BnStopWordFilter();
 		this.verbSuffixFilter = new VerbSuffixFilter();
 	}
 
-	public void iterAndIndexDocuments() throws JsonParseException, JsonMappingException, IOException {
+	public void iterAndIndexDocuments() throws IOException {
 		if (RECREATE_FLAG) {
 			indexService.recreatIndex();
 		}
 
-		List<String> filePaths = FileHandler.getRecursiveFileList(CORPUS_DIRECTORY);
+		indexDirectory(true, TRAIN_CORPUS_DIRECTORY, TRAIN_SET);
+		indexDirectory(false, TEST_CORPUS_DIRECTORY, TEST_SET);
+	}
+
+	public void indexDirectory(Boolean isTrain, String DIR, int number) throws IOException {
+		int counter = 1;
+		List<String> filePaths = FileHandler.getRecursiveFileList(DIR);
+
 		for (String filePath : filePaths) {
 			if (filePath.endsWith(EXTENSION)) {
 
 				String fileName = FileHandler.getFileNameFromPathString(filePath);
 				int docID = Integer.valueOf(RegexUtil.getFirstMatch(fileName, "[0-9]+"));
 
-				Logger.print("INDEXING : " + filePath);
+				Logger.print(counter + " : " + "INDEXING : " + filePath);
 				JsonProcessor jsonProcessor = new JsonProcessor(new File(filePath));
 				Document document = (shafin.nlp.corpus.model.Document) jsonProcessor
 						.convertToModel(shafin.nlp.corpus.model.Document.class);
@@ -82,7 +90,7 @@ public class DocumentIndexer {
 				String article = StringTool.removeUnicodeSpaceChars(new StringBuilder(document.getArticle()));
 				LinkedList<String> SENTENCES = SentenceSpliter.getSentenceTokenListBn(article);
 
-				createIndex(docID, article, SENTENCES);
+				createIndex(isTrain, docID, article, SENTENCES);
 
 				/* Insert the Manual Key-Phrases by extracting features */
 				List<String> manualKP = document.getManualKeyphrases();
@@ -91,6 +99,7 @@ public class DocumentIndexer {
 				for (String KP : manualKP) {
 					if (!indexService.isExists(docID, KP)) {
 						TermIndex index = new TermIndex(docID);
+						index.setTrain(isTrain);
 						KP = KP.trim();
 						index.setTerm(KP);
 
@@ -99,8 +108,9 @@ public class DocumentIndexer {
 						if (tf < 1) {
 							indexService.enlistAsZeroFreqTerm(index);
 						} else {
-							int ps = FeatureExtractor.getOccurrenceOrderInSentence(SENTENCES, KP);
-
+							double ps = FeatureExtractor.getNormalizedOccurrenceOrderInSentence(SENTENCES, KP);
+							
+							
 							index.setManual(true);
 							index.setTf(tf);
 							index.setPs(ps);
@@ -114,12 +124,17 @@ public class DocumentIndexer {
 
 				indexService.batchInsertIndex(newTerms);
 
+				counter++;
+				if (counter > number) {
+					break;
+				}
+
 			}
 		}
-		indexService.updateDF();
+		// indexService.updateDF();
 	}
 
-	private void createIndex(final int docID, final String TEXT, LinkedList<String> SENTENCES) throws IOException {
+	private void createIndex(boolean isTrain, final int docID, final String TEXT, LinkedList<String> SENTENCES) throws IOException {
 		Set<String> TOKENS = new HashSet<>();
 		for (String sentence : SENTENCES) {
 
@@ -150,11 +165,12 @@ public class DocumentIndexer {
 					int tf = FeatureExtractor.getTermOccurrenceCount(TEXT, token);
 					index.setTf(tf);
 					index.setManual(false);
+					index.setTrain(isTrain);
 
 					if (tf < 1) {
 						indexService.enlistAsZeroFreqTerm(index);
 					} else {
-						int ps = FeatureExtractor.getOccurrenceOrderInSentence(SENTENCES, token);
+						double ps = FeatureExtractor.getNormalizedOccurrenceOrderInSentence(SENTENCES, token);
 						index.setPs(ps);
 
 						termIndexes.add(index);
@@ -170,54 +186,10 @@ public class DocumentIndexer {
 		indexService.batchInsertIndex(termIndexes);
 	}
 
-	public Map<String, TermValue> getFeatureVector(int docId) throws IOException {
-		Map<String, TermValue> termVector = new HashMap<>();
-		List<TermIndex> terms = indexService.getIndexTerm(docId);
-		int numDocs = indexService.countDocs();
-
-		for (TermIndex term : terms) {
-			termVector.put(term.getTerm(), new TermValue(term, numDocs));
-		}
-
-		return termVector;
-	}
-
-	class TermValue {
-		private final double tf;
-		private final double idf;
-		private final double pfo;
-
-		public TermValue(TermIndex indexTerm, int numDocs) {
-			/*
-			 * TF : Implemented as sqrt(freq). IDF : Implemented as
-			 * log(numDocs/(docFreq+1)) + 1.
-			 */
-			this.tf = Math.sqrt(indexTerm.getTf());
-			this.idf = Math.log((double) numDocs / (indexTerm.getDf() + 1)) + 1;
-			this.pfo = (double) (1 / Math.sqrt(indexTerm.getPs()));
-		}
-
-		public double getTf() {
-			return tf;
-		}
-
-		public double getIdf() {
-			return idf;
-		}
-
-		public double getPfo() {
-			return pfo;
-		}
-
-		@Override
-		public String toString() {
-			return this.tf + " : " + idf + " : " + pfo;
-		}
-	}
-
 	public static void main(String[] args) throws IOException, ClassNotFoundException {
-		String path = "D:/home/dw/json/QUALIFIED/A 500";
-		DocumentIndexer indexer = new DocumentIndexer(path, true, true);
+		String train = "D:/home/dw/json/QUALIFIED/TRAIN/";
+		String test = "D:/home/dw/json/QUALIFIED/TEST/";
+		DocumentIndexer indexer = new DocumentIndexer(train, test, true, true);
 		indexer.iterAndIndexDocuments();
 
 	}

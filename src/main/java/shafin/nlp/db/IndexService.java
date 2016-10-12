@@ -44,7 +44,7 @@ public class IndexService {
 	}
 
 	public boolean updateDF() {
-		return dao.updateDF();
+		return dao.updateDF(false);
 	}
 
 	public boolean enlistAsZeroFreqTerm(TermIndex index) {

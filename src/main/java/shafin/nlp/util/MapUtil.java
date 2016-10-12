@@ -42,6 +42,7 @@ public class MapUtil {
 		}
 		return result;
 	}
+	
 
 	public static <K> Map<K, Double> normalizeMapValue(Map<K, Double> map) {
 		Double maxVal = new Double(0);
