@@ -114,6 +114,37 @@ public class IndexDao extends BasicDao<TermIndex> {
 				TermIndex term = new TermIndex(rs.getInt("doc_id"));
 				term.setTerm(rs.getString("term"));
 				term.setManual(rs.getBoolean("is_manual"));
+				term.setTrain(rs.getBoolean("is_train"));
+				term.setTf(rs.getInt("tf"));
+				term.setDf(rs.getInt("df"));
+				term.setPs(rs.getDouble("ps"));
+
+				terms.add(term);
+			}
+			return terms;
+		} catch (IllegalStateException | SQLException e) {
+			e.printStackTrace();
+		} finally {
+			leaveGracefully();
+		}
+		return null;
+	}
+
+	public List<TermIndex> getIndexesByIsTrainPagination(boolean isTrain, int page, int size) {
+		try {
+			String query = "SELECT * FROM term_index where is_train = ? LIMIT ?,?";
+			this.qs = DB_CONN.getConnection().prepareStatement(query);
+			this.qs.setBoolean(1, isTrain);
+			this.qs.setInt(2, (page - 1) * size);
+			this.qs.setInt(3, size);
+
+			List<TermIndex> terms = new ArrayList<>();
+			this.rs = this.DB_CONN.retriveResultset(this.qs);
+			while (rs.next()) {
+				TermIndex term = new TermIndex(rs.getInt("doc_id"));
+				term.setTerm(rs.getString("term"));
+				term.setManual(rs.getBoolean("is_manual"));
+				term.setTrain(rs.getBoolean("is_train"));
 				term.setTf(rs.getInt("tf"));
 				term.setDf(rs.getInt("df"));
 				term.setPs(rs.getDouble("ps"));
@@ -151,7 +182,8 @@ public class IndexDao extends BasicDao<TermIndex> {
 	public boolean updateIsManualKP(int docId, String term, boolean isManual) {
 		try {
 			String query = "UPDATE term_index SET is_manual = ? where doc_id = ? and term = ?";
-			this.qs = DB_CONN.getConnection().prepareStatement(query);
+			this.qs = DB_CONN.getConnection().prepareStatement(query, ResultSet.TYPE_FORWARD_ONLY,
+					ResultSet.CONCUR_READ_ONLY);
 			this.qs.setBoolean(1, isManual);
 			this.qs.setInt(2, docId);
 			this.qs.setString(3, term);
@@ -232,10 +264,78 @@ public class IndexDao extends BasicDao<TermIndex> {
 		}
 		return 0;
 	}
+	
+	public int getTrainTermCount() {
+		try {
+			String query = "SELECT count(*) as total FROM term_index where is_train = 1";
+			this.qs = DB_CONN.getConnection().prepareStatement(query);
+
+			this.rs = this.DB_CONN.retriveResultset(this.qs);
+			if (rs.next()) {
+				return rs.getInt("total");
+			}
+		} catch (IllegalStateException | SQLException e) {
+			e.printStackTrace();
+		} finally {
+			leaveGracefully();
+		}
+		return 0;
+	}
+	
+	public int getTestTermCount() {
+		try {
+			String query = "SELECT count(*) as total FROM term_index where is_train = 0";
+			this.qs = DB_CONN.getConnection().prepareStatement(query);
+
+			this.rs = this.DB_CONN.retriveResultset(this.qs);
+			if (rs.next()) {
+				return rs.getInt("total");
+			}
+		} catch (IllegalStateException | SQLException e) {
+			e.printStackTrace();
+		} finally {
+			leaveGracefully();
+		}
+		return 0;
+	}
 
 	public int getDocCount() {
 		try {
 			String query = "SELECT count(DISTINCT doc_id) as total FROM term_index";
+			this.qs = DB_CONN.getConnection().prepareStatement(query);
+
+			this.rs = this.DB_CONN.retriveResultset(this.qs);
+			if (rs.next()) {
+				return rs.getInt("total");
+			}
+		} catch (IllegalStateException | SQLException e) {
+			e.printStackTrace();
+		} finally {
+			leaveGracefully();
+		}
+		return 0;
+	}
+	
+	public int getTrainDocCount() {
+		try {
+			String query = "SELECT count(DISTINCT doc_id) as total FROM term_index where is_train = 1";
+			this.qs = DB_CONN.getConnection().prepareStatement(query);
+
+			this.rs = this.DB_CONN.retriveResultset(this.qs);
+			if (rs.next()) {
+				return rs.getInt("total");
+			}
+		} catch (IllegalStateException | SQLException e) {
+			e.printStackTrace();
+		} finally {
+			leaveGracefully();
+		}
+		return 0;
+	}
+	
+	public int getTestDocCount() {
+		try {
+			String query = "SELECT count(DISTINCT doc_id) as total FROM term_index where is_train = 0";
 			this.qs = DB_CONN.getConnection().prepareStatement(query);
 
 			this.rs = this.DB_CONN.retriveResultset(this.qs);

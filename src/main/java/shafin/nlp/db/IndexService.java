@@ -19,19 +19,19 @@ public class IndexService {
 		dao.createTable();
 	}
 
-	public boolean isExists(int docId, String term){
+	public boolean isExists(int docId, String term) {
 		return dao.isExistsByDocIdAndTerm(docId, term);
 	}
-	
-	public boolean setAsManualKP(int docId, String term){
+
+	public boolean setAsManualKP(int docId, String term) {
 		return dao.updateIsManualKP(docId, term, true);
 	}
-	
+
 	public List<TermIndex> getIndexTerm(int docId) {
 		return dao.getIndexesByDocID(docId);
 	}
 
-	public boolean insertIndex(TermIndex index){
+	public boolean insertIndex(TermIndex index) {
 		return dao.insertTerm(index.getDocId(), index.getTerm(), index.getTf(), index.getPs());
 	}
 
@@ -42,9 +42,33 @@ public class IndexService {
 	public int countDocs() {
 		return dao.getDocCount();
 	}
+	
+	public int countTrainDocs() {
+		return dao.getTrainDocCount();
+	}
+	
+	public int countTestDocs() {
+		return dao.getTestDocCount();
+	}
+
+	public int trainTermCount() {
+		return dao.getTrainTermCount();
+	}
+
+	public int testTermCount() {
+		return dao.getTestTermCount();
+	}
 
 	public boolean updateDF() {
 		return dao.updateDF(false);
+	}
+
+	public List<TermIndex> getTrainSet(int page, int size) {
+		return dao.getIndexesByIsTrainPagination(true, page, size);
+	}
+
+	public List<TermIndex> getTestSet(int page, int size) {
+		return dao.getIndexesByIsTrainPagination(false, page, size);
 	}
 
 	public boolean enlistAsZeroFreqTerm(TermIndex index) {
@@ -55,7 +79,7 @@ public class IndexService {
 			return false;
 		}
 	}
-	
+
 	public boolean enlistAsStopWordContainedTerm(TermIndex index) {
 		try {
 			return dao.insertAsDiscardedTerm(index, IndexDao.stopFilteredFile);
@@ -64,7 +88,7 @@ public class IndexService {
 			return false;
 		}
 	}
-	
+
 	public boolean enlistAsVerbSuffixedTerm(TermIndex index) {
 		try {
 			return dao.insertAsDiscardedTerm(index, IndexDao.verbSuffxFilteredFile);
@@ -73,8 +97,8 @@ public class IndexService {
 			return false;
 		}
 	}
-	
-	public boolean writeDocumentToDisk(Document document, String fileURI){
+
+	public boolean writeDocumentToDisk(Document document, String fileURI) {
 		try {
 			return FileHandler.writeFile(fileURI, document.toJsonString());
 		} catch (IOException e) {

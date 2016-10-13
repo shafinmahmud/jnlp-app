@@ -33,15 +33,14 @@ public class DocumentIndexer {
 
 	private final String TRAIN_CORPUS_DIRECTORY;
 	private final String TEST_CORPUS_DIRECTORY;
-
-	private final int TRAIN_SET = 5;
-	private final int TEST_SET = 1;
-
 	private final String EXTENSION = ".json";
 
-	private final boolean RECREATE_FLAG;
+	private final int TRAIN_SET = 500;
+	private final int TEST_SET = 100;
 
+	private final boolean RECREATE_FLAG;
 	private final boolean NGRAM_FLAG;
+
 	private final int MIN_NGRAM = 2;
 	private final int MAX_NGRAM = 3;
 
@@ -109,8 +108,7 @@ public class DocumentIndexer {
 							indexService.enlistAsZeroFreqTerm(index);
 						} else {
 							double ps = FeatureExtractor.getNormalizedOccurrenceOrderInSentence(SENTENCES, KP);
-							
-							
+
 							index.setManual(true);
 							index.setTf(tf);
 							index.setPs(ps);
@@ -131,10 +129,11 @@ public class DocumentIndexer {
 
 			}
 		}
-		// indexService.updateDF();
+		indexService.updateDF();
 	}
 
-	private void createIndex(boolean isTrain, final int docID, final String TEXT, LinkedList<String> SENTENCES) throws IOException {
+	private void createIndex(boolean isTrain, final int docID, final String TEXT, LinkedList<String> SENTENCES)
+			throws IOException {
 		Set<String> TOKENS = new HashSet<>();
 		for (String sentence : SENTENCES) {
 
