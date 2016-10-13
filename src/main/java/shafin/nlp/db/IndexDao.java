@@ -11,8 +11,14 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import shafin.nlp.corpus.model.TermIndex;
 import shafin.nlp.util.Logger;
 
+/*
+ * Author : Shafin Mahmud
+ * Email  : shafin.mahmud@gmail.com
+ * Date	  : 02-10-2016 SUN
+ */
 public class IndexDao extends BasicDao<TermIndex> {
 
 	public static File zeroFreqFile = new File(SQLiteDBConn.ZERO_FREQ_FILE);
@@ -159,6 +165,37 @@ public class IndexDao extends BasicDao<TermIndex> {
 		}
 		return null;
 	}
+	
+	public List<TermIndex> getIndexesByIsTrainPagination(int docId, boolean isTrain, int page, int size) {
+		try {
+			String query = "SELECT * FROM term_index where is_train = ? and doc_id = ? LIMIT ?,?";
+			this.qs = DB_CONN.getConnection().prepareStatement(query);
+			this.qs.setBoolean(1, isTrain);
+			this.qs.setInt(2, docId);
+			this.qs.setInt(3, (page - 1) * size);
+			this.qs.setInt(4, size);
+
+			List<TermIndex> terms = new ArrayList<>();
+			this.rs = this.DB_CONN.retriveResultset(this.qs);
+			while (rs.next()) {
+				TermIndex term = new TermIndex(rs.getInt("doc_id"));
+				term.setTerm(rs.getString("term"));
+				term.setManual(rs.getBoolean("is_manual"));
+				term.setTrain(rs.getBoolean("is_train"));
+				term.setTf(rs.getInt("tf"));
+				term.setDf(rs.getInt("df"));
+				term.setPs(rs.getDouble("ps"));
+
+				terms.add(term);
+			}
+			return terms;
+		} catch (IllegalStateException | SQLException e) {
+			e.printStackTrace();
+		} finally {
+			leaveGracefully();
+		}
+		return null;
+	}
 
 	public boolean isExistsByDocIdAndTerm(int docId, String term) {
 		try {
@@ -252,6 +289,24 @@ public class IndexDao extends BasicDao<TermIndex> {
 		try {
 			String query = "SELECT count(DISTINCT term) as total FROM term_index";
 			this.qs = DB_CONN.getConnection().prepareStatement(query);
+
+			this.rs = this.DB_CONN.retriveResultset(this.qs);
+			if (rs.next()) {
+				return rs.getInt("total");
+			}
+		} catch (IllegalStateException | SQLException e) {
+			e.printStackTrace();
+		} finally {
+			leaveGracefully();
+		}
+		return 0;
+	}
+	
+	public int getTermCountByDoc(int docId) {
+		try {
+			String query = "SELECT count(*) as total FROM term_index where doc_id = ?";
+			this.qs = DB_CONN.getConnection().prepareStatement(query);
+			this.qs.setInt(1, docId);
 
 			this.rs = this.DB_CONN.retriveResultset(this.qs);
 			if (rs.next()) {

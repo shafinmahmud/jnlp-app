@@ -6,8 +6,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import shafin.nlp.corpus.model.TermIndex;
+import shafin.nlp.corpus.model.TermValue;
 import shafin.nlp.db.IndexService;
-import shafin.nlp.db.TermIndex;
 import shafin.nlp.util.MapUtil;
 
 public class NGramRanking {

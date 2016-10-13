@@ -14,6 +14,11 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import shafin.nlp.tokenizer.BanglaWordTokenizer;
 import shafin.nlp.tokenizer.NoneWordTokenFilter;
 
+/*
+ * Author : Shafin Mahmud
+ * Email  : shafin.mahmud@gmail.com
+ * Date	  : 02-10-2016 SUN
+ */
 public class BanglaWordAnalyzer extends Analyzer {
 
 	private final Reader reader;
@@ -31,7 +36,7 @@ public class BanglaWordAnalyzer extends Analyzer {
 	protected TokenStreamComponents createComponents(String fieldName) {
 		Tokenizer tokenizer = new BanglaWordTokenizer(reader);
 		TokenStream filter = new NoneWordTokenFilter(tokenizer);
-		
+
 		TokenStream noneAlphabetFilter = new NoneWordTokenFilter(filter);
 		return new TokenStreamComponents(tokenizer, noneAlphabetFilter);
 	}

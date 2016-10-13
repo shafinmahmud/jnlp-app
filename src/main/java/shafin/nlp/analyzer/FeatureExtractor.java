@@ -1,13 +1,17 @@
-package shafin.nlp.pfo;
+package shafin.nlp.analyzer;
 
 import java.io.StringReader;
 import java.util.LinkedList;
 import java.util.List;
 
-import shafin.nlp.analyzer.BanglaWordAnalyzer;
 import shafin.nlp.tokenizer.SentenceSpliter;
 import shafin.nlp.util.RegexUtil;
 
+/*
+ * Author : Shafin Mahmud
+ * Email  : shafin.mahmud@gmail.com
+ * Date	  : 02-10-2016 SUN
+ */
 public class FeatureExtractor {
 
 	private static final String BOUNDARY = "\\s|\\/|\\(|\\)|\\.|-|–|\\'|\"|!|,|,|\\?|;|’|‘|\\+|৷ |৷|।|—|:";

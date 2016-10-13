@@ -10,14 +10,20 @@ import java.util.List;
 import java.util.Map;
 
 import shafin.nlp.analyzer.BanglaWordAnalyzer;
+import shafin.nlp.analyzer.FeatureExtractor;
 import shafin.nlp.corpus.model.Document;
-import shafin.nlp.pfo.FeatureExtractor;
 import shafin.nlp.tokenizer.SentenceSpliter;
 import shafin.nlp.util.FileHandler;
 import shafin.nlp.util.JsonProcessor;
 import shafin.nlp.util.Logger;
 import shafin.nlp.util.StringTool;
 
+
+/*
+ * Author : Shafin Mahmud
+ * Email  : shafin.mahmud@gmail.com
+ * Date	  : 02-10-2016 SUN
+ */
 public class CorpusAnalysis {
 	private final String CORPUS_DIRECTORY;
 	private final List<Document> DOC_LIST;

@@ -1,12 +1,13 @@
-package shafin.nlp.main;
+package shafin.nlp.corpus.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import shafin.nlp.db.TermIndex;
+public class TermValue implements Comparable<TermValue> {
 
-public class TermValue {
+	private int docId;
+	private String term;
 
 	private double tf;
 	private double idf;
@@ -15,7 +16,11 @@ public class TermValue {
 	private double combind;
 	private boolean isManual;
 
+	private double probability;
+
 	public TermValue(TermIndex indexTerm, int numDocs) {
+		this.docId = indexTerm.getDocId();
+		this.term = indexTerm.getTerm();
 		/*
 		 * TF : Implemented as freq. IDF : Implemented as
 		 * log(numDocs/(docFreq+1)).
@@ -26,6 +31,22 @@ public class TermValue {
 		this.tf_idf = tf * idf;
 		this.combind = this.tf_idf + this.pfo;
 		this.isManual = indexTerm.isManual();
+	}
+
+	public int getDocId() {
+		return docId;
+	}
+
+	public void setDocId(int docId) {
+		this.docId = docId;
+	}
+
+	public String getTerm() {
+		return term;
+	}
+
+	public void setTerm(String term) {
+		this.term = term;
 	}
 
 	public double getTf() {
@@ -76,6 +97,14 @@ public class TermValue {
 		this.isManual = isManual;
 	}
 
+	public double getProbability() {
+		return probability;
+	}
+
+	public void setProbability(double probability) {
+		this.probability = probability;
+	}
+
 	public static List<TermValue> normalizeTermValueList(List<TermValue> list) {
 		List<Double> tflist = new ArrayList<>();
 		List<Double> idflist = new ArrayList<>();
@@ -103,13 +132,21 @@ public class TermValue {
 		return list;
 	}
 
-	public String toCsvString(){
+	public String toCsvString() {
 		int dataClazz = this.isManual() ? 1 : 0;
-		return dataClazz+","+this.getTf()+","+this.getIdf()+","+this.getPfo();
+		return dataClazz + "," + this.getTf() + "," + this.getIdf() + "," + this.getPfo();
 	}
-	
+
 	@Override
 	public String toString() {
 		return this.pfo + " : " + tf_idf + " : " + combind;
+	}
+
+	@Override
+	public int compareTo(TermValue o) {
+		if (this.probability == o.probability) {
+			return 0;
+		}
+		return this.probability > o.probability ? -1 : 1;
 	}
 }

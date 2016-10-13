@@ -13,8 +13,9 @@ import shafin.nlp.util.Logger;
 import shafin.nlp.util.ReflectionUtil;
 
 /*
- * writter: Shafin Mahmud
- * email : shafin.mahmud@gmail.com
+ * Author : Shafin Mahmud
+ * Email  : shafin.mahmud@gmail.com
+ * Date	  : 02-10-2016 SUN
  * 
  * This Converter can map well-formatted Text file to Object Class and then to Json Format.
  * But Prerequisite is to Mapping class can only have Iteger, Long, Float, Long, String and 

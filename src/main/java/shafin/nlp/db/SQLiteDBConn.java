@@ -6,6 +6,11 @@ import java.sql.SQLException;
 
 import org.sqlite.SQLiteConfig;
 
+/*
+ * Author : Shafin Mahmud
+ * Email  : shafin.mahmud@gmail.com
+ * Date	  : 02-10-2016 SUN
+ */
 public class SQLiteDBConn extends DBConn{
 
 	private static Connection staticConnection;

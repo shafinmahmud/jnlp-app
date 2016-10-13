@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import shafin.nlp.analyzer.FeatureExtractor;
 import shafin.nlp.corpus.model.Document;
 import shafin.nlp.db.IndexService;
-import shafin.nlp.pfo.FeatureExtractor;
 import shafin.nlp.tokenizer.SentenceSpliter;
 import shafin.nlp.util.FileHandler;
 import shafin.nlp.util.JsonProcessor;
@@ -17,6 +17,11 @@ import shafin.nlp.util.Logger;
 import shafin.nlp.util.RegexUtil;
 import shafin.nlp.util.StringTool;
 
+/*
+ * Author : Shafin Mahmud
+ * Email  : shafin.mahmud@gmail.com
+ * Date	  : 02-10-2016 SUN
+ */
 public class DocumentQualifier {
 
 	public static final int DOC_CRITERIA_SENTENCE_NUM = 20;
@@ -97,10 +102,10 @@ public class DocumentQualifier {
 			}
 
 		}
-		redistributeFiles();
+		//redistributeFiles();
 	}
 
-	private void redistributeFiles() throws IOException {
+	public void redistributeFiles() throws IOException {
 		int totalDoc = this.EXISTING_FILES.size();
 		int folderNeeded = totalDoc % SPLIT_DOC_IN == 0 ? (totalDoc / SPLIT_DOC_IN) : (totalDoc / SPLIT_DOC_IN) + 1;
 

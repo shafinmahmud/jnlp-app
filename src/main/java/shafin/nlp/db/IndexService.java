@@ -4,8 +4,14 @@ import java.io.IOException;
 import java.util.List;
 
 import shafin.nlp.corpus.model.Document;
+import shafin.nlp.corpus.model.TermIndex;
 import shafin.nlp.util.FileHandler;
 
+/*
+ * Author : Shafin Mahmud
+ * Email  : shafin.mahmud@gmail.com
+ * Date	  : 02-10-2016 SUN
+ */
 public class IndexService {
 
 	private final IndexDao dao;
@@ -59,6 +65,10 @@ public class IndexService {
 		return dao.getTestTermCount();
 	}
 
+	public int termCountByDoc(int docId){
+		return dao.getTermCountByDoc(docId);
+	}
+	
 	public boolean updateDF() {
 		return dao.updateDF(false);
 	}
@@ -66,9 +76,17 @@ public class IndexService {
 	public List<TermIndex> getTrainSet(int page, int size) {
 		return dao.getIndexesByIsTrainPagination(true, page, size);
 	}
+	
+	public List<TermIndex> getTrainSet(int docId, int page, int size) {
+		return dao.getIndexesByIsTrainPagination(docId, true, page, size);
+	}
 
 	public List<TermIndex> getTestSet(int page, int size) {
 		return dao.getIndexesByIsTrainPagination(false, page, size);
+	}
+	
+	public List<TermIndex> getTestSet(int docId, int page, int size) {
+		return dao.getIndexesByIsTrainPagination(docId, false, page, size);
 	}
 
 	public boolean enlistAsZeroFreqTerm(TermIndex index) {

@@ -10,11 +10,11 @@ import java.util.List;
 import java.util.Set;
 
 import shafin.nlp.analyzer.BanglaWordAnalyzer;
+import shafin.nlp.analyzer.FeatureExtractor;
 import shafin.nlp.analyzer.NGramAnalyzer;
 import shafin.nlp.corpus.model.Document;
+import shafin.nlp.corpus.model.TermIndex;
 import shafin.nlp.db.IndexService;
-import shafin.nlp.db.TermIndex;
-import shafin.nlp.pfo.FeatureExtractor;
 import shafin.nlp.tokenizer.BnStopWordFilter;
 import shafin.nlp.tokenizer.SentenceSpliter;
 import shafin.nlp.tokenizer.VerbSuffixFilter;

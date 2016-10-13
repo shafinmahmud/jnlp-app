@@ -6,12 +6,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import shafin.nlp.corpus.model.TermIndex;
+import shafin.nlp.corpus.model.TermValue;
 import shafin.nlp.db.IndexService;
-import shafin.nlp.db.TermIndex;
-import shafin.nlp.main.TermValue;
 import shafin.nlp.util.FileHandler;
 import shafin.nlp.util.Logger;
 
+
+/*
+ * Author : Shafin Mahmud
+ * Email  : shafin.mahmud@gmail.com
+ * Date	  : 02-10-2016 SUN
+ */
 public class DataSetGenerator {
 
 	public enum DatasetType {
@@ -74,7 +80,8 @@ public class DataSetGenerator {
 				positive++;
 			}
 		}
-
+		positive = 5*positive;
+		
 		Random random = new Random();
 		while (positive > 0) {
 			int i = random.nextInt(indexes.size());

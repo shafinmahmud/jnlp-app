@@ -10,7 +10,15 @@ import org.codehaus.jackson.map.JsonMappingException;
 
 import shafin.nlp.util.JsonProcessor;
 
-/* This is decided to use for articles from dw.com*/
+/*
+ * Author : Shafin Mahmud
+ * Email  : shafin.mahmud@gmail.com
+ * Date	  : 02-10-2016 SUN
+ *
+ * This is decided to use for articles 
+ * from dw.com
+ * 
+ * */
 public class Document implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -143,8 +151,8 @@ public class Document implements Serializable {
 				+ "\nmanualKeyphrases : " + manualKeyphrases.toString() + "\nautomaticKeyphrases : "
 				+ automaticKeyphrases.toString() + "\narticle : " + article;
 	}
-	
-	public String toJsonString() throws JsonGenerationException, JsonMappingException, IOException{
+
+	public String toJsonString() throws JsonGenerationException, JsonMappingException, IOException {
 		JsonProcessor processor = new JsonProcessor();
 		return processor.convertToJson(this);
 	}

@@ -1,4 +1,4 @@
-package shafin.nlp.db;
+package shafin.nlp.corpus.model;
 
 import java.io.IOException;
 
@@ -7,6 +7,11 @@ import org.codehaus.jackson.map.JsonMappingException;
 
 import shafin.nlp.util.JsonProcessor;
 
+/*
+ * Author : Shafin Mahmud
+ * Email  : shafin.mahmud@gmail.com
+ * Date	  : 02-10-2016 SUN
+ */
 public class TermIndex {
 
 	private final int docId;

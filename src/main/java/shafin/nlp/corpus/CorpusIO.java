@@ -8,6 +8,12 @@ import java.util.List;
 
 import shafin.nlp.util.FileHandler;
 
+
+/*
+ * Author : Shafin Mahmud
+ * Email  : shafin.mahmud@gmail.com
+ * Date	  : 02-10-2016 SUN
+ */
 public class CorpusIO {
 
 	private final String CORPUS_DIRECTORY;

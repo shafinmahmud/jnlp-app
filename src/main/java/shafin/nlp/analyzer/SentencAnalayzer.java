@@ -4,6 +4,11 @@ import java.util.List;
 
 import shafin.nlp.tokenizer.SentenceSpliter;
 
+/*
+ * Author : Shafin Mahmud
+ * Email  : shafin.mahmud@gmail.com
+ * Date	  : 02-10-2016 SUN
+ */
 public class SentencAnalayzer {
 	
 	private final String TEXT;
