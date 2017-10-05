@@ -1,0 +1,20 @@
+description='All NLP works'
+
+dependencies {
+    compile project(':common')
+
+    def luceneVersion = '5.5.0'
+    compile "org.apache.lucene:lucene-core:${luceneVersion}"
+    compile "org.apache.lucene:lucene-analyzers-common:${luceneVersion}"
+
+    compile "org.deeplearning4j:deeplearning4j-ui:0.6.0"
+    compile "org.deeplearning4j:deeplearning4j-nlp:0.9.1"
+
+    // https://mvnrepository.com/artifact/edu.stanford.nlp/stanford-corenlp
+    compile "edu.stanford.nlp:stanford-corenlp:3.8.0"
+
+    compile "org.nd4j:nd4j-native:0.9.1"
+    compile "jfree:jfreechart:1.0.13"
+
+    compile "org.xerial:sqlite-jdbc:3.8.11.2"
+}

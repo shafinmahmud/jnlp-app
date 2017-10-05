@@ -1,0 +1,11 @@
+description='Common utitlity and Functions'
+
+dependencies {
+    compile group: 'org.apache.commons', name: 'commons-lang3', version:'3.4'
+
+    compile group: 'org.codehaus.jackson', name: 'jackson-mapper-asl', version:'1.9.13'
+    compile group: 'joda-time', name: 'joda-time', version:'2.3'
+
+    compile group: 'org.slf4j', name: 'slf4j-api', version:'1.7.5'
+    runtime group: 'ch.qos.logback', name: 'logback-classic', version:'1.0.13'
+}

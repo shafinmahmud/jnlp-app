@@ -1,0 +1,7 @@
+description='General Purpose Article Crawler'
+
+dependencies {
+    compile project(':common')
+
+    compile "org.jsoup:jsoup:1.10.3"
+}
