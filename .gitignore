@@ -1,1 +1,12 @@
-/target/
+.class
+.idea
+out
+build
+*.iml
+.gradle/
+classes
+target
+.settings
+.classpath
+.project
+desktop.ini
