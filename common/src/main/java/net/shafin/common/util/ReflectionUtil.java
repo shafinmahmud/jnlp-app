@@ -25,6 +25,7 @@ public class ReflectionUtil {
                 }
             }
         }
+
         return oldBean;
     }
 
@@ -35,13 +36,16 @@ public class ReflectionUtil {
             try {
                 Field field = clazz.getDeclaredField(fieldName);
                 field.setAccessible(true);
+
                 return (V) field.get(object);
+
             } catch (NoSuchFieldException e) {
                 clazz = clazz.getSuperclass();
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             }
         }
+
         return null;
     }
 
@@ -54,13 +58,16 @@ public class ReflectionUtil {
 
                 Object value = convertStringToValue(fieldValue, field.getType().getSimpleName());
                 field.set(object, value);
+
                 return true;
+
             } catch (NoSuchFieldException e) {
                 clazz = clazz.getSuperclass();
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             }
         }
+
         return false;
     }
 
@@ -70,15 +77,17 @@ public class ReflectionUtil {
             try {
                 Field field = clazz.getDeclaredField(fieldName);
                 field.setAccessible(true);
-
                 field.set(object, fieldValue);
+
                 return true;
+
             } catch (NoSuchFieldException e) {
                 clazz = clazz.getSuperclass();
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             }
         }
+
         return false;
     }
 

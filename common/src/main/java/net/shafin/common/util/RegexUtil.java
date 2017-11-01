@@ -17,11 +17,8 @@ public class RegexUtil {
     public static String getFirstMatch(String input, String regex) {
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(input);
-        if (matcher.find()) {
-            return matcher.group(0);
-        } else {
-            return "";
-        }
+
+        return matcher.find() ? matcher.group(0) : "";
     }
 
     public static int countMatches(String input, String regex) {
@@ -32,6 +29,7 @@ public class RegexUtil {
         while (matcher.find()) {
             count++;
         }
+
         return count;
     }
 
@@ -42,17 +40,15 @@ public class RegexUtil {
         while (matcher.find()) {
             allMatches.add(matcher.group());
         }
+
         return allMatches;
     }
 
     public static boolean containsPattern(String input, String regex) {
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(input);
-        if (matcher.find()) {
-            return true;
-        } else {
-            return false;
-        }
+
+        return matcher.find();
     }
 
     public static LinkedList<String> getSplittedTokens(String input, String splitRegex) {
@@ -63,6 +59,7 @@ public class RegexUtil {
         for (String token : tokens) {
             tokenList.add(token);
         }
+
         return tokenList;
     }
 
@@ -70,6 +67,5 @@ public class RegexUtil {
         String string = "বেশিরভাগ মুসলিম অধ্যুষিত দেশেই যৌনশিক্ষাকে ‘ট্যাবু' হিসেবে দেখা হয়৷ যেমন ধরুন মিশর৷ কিন্তু মিশরেরই এক ডাক্তার সেই ট্যাবু,";
         System.out.println(string);
         System.out.println(StringUtils.replacePattern(string, "\\p{InGeneral_Punctuation}", ""));
-
     }
 }

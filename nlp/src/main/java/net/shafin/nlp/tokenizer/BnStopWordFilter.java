@@ -1,8 +1,8 @@
 package net.shafin.nlp.tokenizer;
 
+import net.shafin.common.util.FileUtil;
 import net.shafin.nlp.analyzer.NGramAnalyzer;
 import net.shafin.nlp.analyzer.BanglaWordAnalyzer;
-import net.shafin.common.util.FileHandler;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -20,13 +20,13 @@ public class BnStopWordFilter {
     public final List<String> STOP_WORDS;
 
     public BnStopWordFilter() {
-        List<String> words = FileHandler.readFile(PROJECT_DIR + "nlp/resources/stopword.txt");
+        List<String> words = FileUtil.readFile(PROJECT_DIR + "nlp/resources/stopword.txt");
         this.STOP_WORDS = new ArrayList<>();
         for (String word : words) {
             this.STOP_WORDS.add(word.trim());
         }
         Collections.sort(this.STOP_WORDS);
-        FileHandler.writeListToFile(PROJECT_DIR + "nlp/resources/stopword.txt", this.STOP_WORDS);
+        FileUtil.writeListToFile(PROJECT_DIR + "nlp/resources/stopword.txt", this.STOP_WORDS);
     }
 
     public boolean doesContainStopWordInBoundary(String ngram) {

@@ -1,5 +1,3 @@
-/*
- */
 package net.shafin.common.util;
 
 import java.io.*;
@@ -12,7 +10,7 @@ import java.util.Set;
  * @author Shafin Mahmud
  * @since 10/2/2016
  */
-public class FileHandler {
+public class FileUtil {
 
     public static List<String> getFileList(String filePath) {
         List<String> fileNames = new ArrayList<>();
@@ -25,6 +23,7 @@ public class FileHandler {
                 fileNames.add(listOfFiles[i].getName());
             }
         }
+
         return fileNames;
     }
 
@@ -70,7 +69,6 @@ public class FileHandler {
     }
 
     public static List<String> readFile(String filePath) {
-
         List<String> lines = new ArrayList<>();
         BufferedReader br = null;
         String line = null;
@@ -98,7 +96,6 @@ public class FileHandler {
     }
 
     public static List<String> readFileOrCreateIfNotExists(String filePath) {
-
         List<String> lines = new ArrayList<>();
         BufferedReader br = null;
         String line = null;
@@ -132,11 +129,9 @@ public class FileHandler {
     }
 
     public static String readFileAsSingleString(String filePath) {
-
         StringBuilder sb = new StringBuilder();
         BufferedReader in = null;
         try {
-
             File file = new File(filePath);
             if (!file.exists()) {
                 file.createNewFile();
@@ -339,12 +334,18 @@ public class FileHandler {
         return path;
     }
 
-    public static void main(String[] args) throws IOException {
-        // তেলাপোকার দুধ: ভবিষ্যতের ‘সুপারফুড'?
-        // শিশু শরণার্থী: অপরাধীদের সহজ লক্ষ্য
-        // ২০১৬ অলিম্পিক: রিও কি প্রস্তুত?
-        String filePath = "D:\\home\\dw\\json\\QUALIFIED";
-        System.out.println(getRecursiveNoneEmptyChildFolders(filePath));
+    public static void createFileIfNotExist(String path) {
+        File file = new File(path);
+        if (file.isDirectory()) {
+            throw new IllegalStateException(path + " is Not a File.");
+        }
 
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

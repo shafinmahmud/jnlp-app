@@ -126,8 +126,8 @@ public class VerbsDao extends BasicDao<TermIndex> {
 
             this.qs.executeBatch();
             this.DB_CONN.getConnection().commit();
-
             DB_CONN.getConnection().setAutoCommit(true);
+
             return true;
 
         } catch (IllegalStateException | SQLException e) {
@@ -135,8 +135,7 @@ public class VerbsDao extends BasicDao<TermIndex> {
         } finally {
             leaveGracefully();
         }
+
         return false;
-
     }
-
 }

@@ -1,5 +1,3 @@
-/*
- */
 package net.shafin.common.util;
 
 import org.joda.time.DateTime;
@@ -23,15 +21,6 @@ import java.util.logging.Logger;
 public class DateTimeUtil {
 
     private static final String LOCAL_TIME_ZONE = "GMT+6:00";
-
-    public static void main(String[] args) {
-        System.out.println(getSytemTimeStamp());
-        System.out.println(getLocalTimeStamp());
-        System.out.println(getLocalTimeStamp12H());
-
-        System.out.println(convertTimeStampToEpoch(getSytemTimeStamp()));
-        System.out.println(convertTimeStampToEpoch(getLocalTimeStamp()));
-    }
 
     public static String getSytemTimeStamp() {
         //2016-01-12 21:55:09
@@ -170,6 +159,4 @@ public class DateTimeUtil {
             return "0000-00-00 00:00:00";
         }
     }
-
-
 }

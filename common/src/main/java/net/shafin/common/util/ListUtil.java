@@ -12,7 +12,7 @@ import java.util.List;
 public class ListUtil {
 
     public static List<String> pickNRandom(List<String> lst, int n) {
-        List<String> copy = new LinkedList<String>(lst);
+        List<String> copy = new LinkedList<>(lst);
         Collections.shuffle(copy);
         return copy.subList(0, n);
     }
@@ -40,9 +40,8 @@ public class ListUtil {
         return true;
     }
 
-
     public static void main(String[] args) {
-        List<String> myList = new ArrayList<String>();
+        List<String> myList = new ArrayList<>();
         myList.add("one");
         myList.add("two");
         myList.add("three");

@@ -4,10 +4,10 @@ import net.shafin.nlp.analyzer.BanglaWordAnalyzer;
 import net.shafin.nlp.analyzer.FeatureExtractor;
 import net.shafin.common.model.Document;
 import net.shafin.nlp.tokenizer.SentenceSpliter;
-import net.shafin.common.util.FileHandler;
+import net.shafin.common.util.FileUtil;
 import net.shafin.common.util.JsonProcessor;
 import net.shafin.common.util.Logger;
-import net.shafin.common.util.StringTool;
+import net.shafin.common.util.StringUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,7 +29,7 @@ public class CorpusAnalysis {
     }
 
     public List<Document> getDocumentList() throws IOException {
-        List<String> paths = FileHandler.getRecursiveFileList(CORPUS_DIRECTORY);
+        List<String> paths = FileUtil.getRecursiveFileList(CORPUS_DIRECTORY);
         List<Document> list = new ArrayList<>();
 
         for (String filePath : paths) {
@@ -68,7 +68,7 @@ public class CorpusAnalysis {
         Map<Integer, Integer> occurrenceOrderMap = new HashMap<>();
         for (Document document : this.DOC_LIST) {
 
-            String article = StringTool.cleanPunctuation(document.getArticle());
+            String article = StringUtil.cleanPunctuation(document.getArticle());
             LinkedList<String> SENTENCES = SentenceSpliter.getSentenceTokenListBn(article);
             List<String> manualKPs = document.getManualKeyphrases();
 

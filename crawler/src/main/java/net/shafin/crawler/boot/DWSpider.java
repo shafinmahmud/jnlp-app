@@ -1,10 +1,11 @@
-package net.shafin.crawler.home;
+package net.shafin.crawler.boot;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.shafin.crawler.spider.SpiderConfig;
+import net.shafin.crawler.model.DomainSetup;
+import net.shafin.crawler.model.EnvSetup;
 import net.shafin.crawler.spider.Spider;
 
 /**
@@ -23,30 +24,31 @@ public class DWSpider {
         String DOMAIN = "http://www.dw.com";
 
 		/*
-		 * FILTER is the Regex pattern to match the URL you will accept for
+         * FILTER is the Regex pattern to match the URL you will accept for
 		 * storing and crawling
 		 */
-        String FILTER = "\\/bn\\/\\.*";
+        String acceptingPattern = "\\/bn\\/\\.*";
 		
 		/*
 		 * ExcludeStrings is the List of Strings that will be used to search for
 		 * in every URL to check whether it contains any of them. If it contains
 		 * then then URL will be excluded. 
 		 */
-        List<String> excludeStrings = new ArrayList<>();
-        excludeStrings.add("m.dw.com");
-        excludeStrings.add("/search/");
-        excludeStrings.add("/মিডিয়া-সেন্টার/");
-        excludeStrings.add("/overlay/media/");
-        excludeStrings.add("/bn/gelöscht/");
+        DomainSetup domain = DomainSetup.init(DOMAIN)
+                .accepting(acceptingPattern)
+                .exclude("m.dw.com",
+                        "/search/",
+                        "/মিডিয়া-সেন্টার/",
+                        "/overlay/media/",
+                        "/bn/gelöscht/");
 		
 		/*
 		 * This is the folder path for Data storage and state storing
 		 */
         String outputFolder = "D:/home/dw/";
-        SpiderConfig config = new SpiderConfig(DOMAIN, FILTER, excludeStrings, outputFolder);
+        EnvSetup config = new EnvSetup(outputFolder);
 
-        Spider spider = new Spider(config);
+        Spider spider = new Spider(domain, config);
         spider.process("http://www.dw.com/bn/");
     }
 }

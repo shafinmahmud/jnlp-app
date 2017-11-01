@@ -1,6 +1,9 @@
 package net.shafin.crawler.spider;
 
-import net.shafin.common.util.FileHandler;
+import net.shafin.common.util.FileUtil;
+import net.shafin.crawler.model.DomainSetup;
+import net.shafin.crawler.model.EnvSetup;
+import net.shafin.crawler.model.UrlQueue;
 import org.jsoup.HttpStatusException;
 
 import java.io.File;
@@ -23,25 +26,25 @@ public class Spider {
 
     public Queue<String> urlQueue;
     public LinkExtractor extractor;
-    public UrlDB db;
+    public UrlQueue db;
 
     private int counter;
 
-    public Spider(SpiderConfig config) {
+    public Spider(DomainSetup config, EnvSetup env) {
         this.extractor = new LinkExtractor(config);
-        this.db = new UrlDB();
+        this.db = new UrlQueue();
         this.urlQueue = new LinkedList<>();
 
-        this.HOTLINK_PATH = config.getHOTLINK_PATH();
-        this.HISTORY_PATH = config.getHISTORY_PATH();
-        this.STORAGE_PATH = config.getSTORAGE_PATH();
-        this.FAILED_LINK_PATH = config.getFAILED_LINK_PATH();
+        this.HOTLINK_PATH = env.getHOTLINK_PATH();
+        this.HISTORY_PATH = env.getHISTORY_PATH();
+        this.STORAGE_PATH = env.getSTORAGE_PATH();
+        this.FAILED_LINK_PATH = env.getFAILED_LINK_PATH();
     }
 
     private void loadStoredLinksInQueue() {
         File file = new File(STORAGE_PATH);
-        List<String> hotLinks = FileHandler.readFile(HOTLINK_PATH);
-        String queueHead = FileHandler.readFileAsSingleString(HISTORY_PATH);
+        List<String> hotLinks = FileUtil.readFile(HOTLINK_PATH);
+        String queueHead = FileUtil.readFileAsSingleString(HISTORY_PATH);
         boolean headFound = false;
 
         if (file.exists()) {
@@ -49,7 +52,7 @@ public class Spider {
                 this.urlQueue.add(hot);
             }
 
-            List<String> list = FileHandler.readFile(STORAGE_PATH);
+            List<String> list = FileUtil.readFile(STORAGE_PATH);
             for (String l : list) {
                 this.db.insert(l);
 
@@ -79,7 +82,7 @@ public class Spider {
                             urlQueue.add(url);
                             db.insert(url);
                             System.out.println("INSERTING: " + ++counter + " Q[" + this.urlQueue.size() + "] " + url);
-                            FileHandler.appendFile(STORAGE_PATH, url + "\n");
+                            FileUtil.appendFile(STORAGE_PATH, url + "\n");
                         } else {
                             System.out.println("EXISTING: " + counter + " Q["
                                     + this.urlQueue.size() + "] " + url);
@@ -87,15 +90,14 @@ public class Spider {
                     }
                 } catch (HttpStatusException e) {
                     System.out.println("EXCEPTION : " + e.getMessage());
-                    FileHandler.appendFile(FAILED_LINK_PATH, seed + "\n");
+                    FileUtil.appendFile(FAILED_LINK_PATH, seed + "\n");
                 }
 
                 seed = urlQueue.poll();
-                FileHandler.writeFile(HISTORY_PATH, seed);
+                FileUtil.writeFile(HISTORY_PATH, seed);
             } while (!urlQueue.isEmpty());
         } catch (UnknownHostException | NullPointerException e) {
             e.printStackTrace();
         }
     }
-
 }

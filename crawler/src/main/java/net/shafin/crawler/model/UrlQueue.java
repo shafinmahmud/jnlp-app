@@ -1,4 +1,4 @@
-package net.shafin.crawler.spider;
+package net.shafin.crawler.model;
 
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -7,11 +7,11 @@ import java.util.TreeSet;
  * @author Shafin Mahmud
  * @since 7/26/2016
  */
-public class UrlDB {
+public class UrlQueue {
 
     private SortedSet<String> uniqueLinks;
 
-    public UrlDB() {
+    public UrlQueue() {
         uniqueLinks = new TreeSet<>();
     }
 

@@ -6,11 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import net.shafin.common.util.FileUtil;
 import net.shafin.nlp.corpus.model.TermIndex;
 import net.shafin.nlp.corpus.model.TermValue;
 import net.shafin.nlp.db.IndexService;
 import net.shafin.common.util.Logger;
-import net.shafin.common.util.FileHandler;
 
 /**
  * @author Shafin Mahmud
@@ -28,7 +28,7 @@ public class DataSetGenerator {
 
     public DataSetGenerator(DatasetType type, String outputPath) {
         this.indexService = new IndexService();
-        this.OUT_PUT_PATH = FileHandler.getCanonicalPath(outputPath);
+        this.OUT_PUT_PATH = FileUtil.getCanonicalPath(outputPath);
         this.TYPE = type;
     }
 
@@ -70,7 +70,7 @@ public class DataSetGenerator {
 
         for (TermValue value : valueList) {
             String data = value.toCsvString();
-            FileHandler.appendFile(OUT_PUT_PATH + "\\" + fileName, data + "\n");
+            FileUtil.appendFile(OUT_PUT_PATH + "\\" + fileName, data + "\n");
             Logger.print("WRITTING : " + data);
         }
     }

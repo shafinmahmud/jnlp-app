@@ -42,7 +42,7 @@ public class InflattedVerbIndexer {
         String path = CORPUS_DIRECTORY + "expl.data";
         File his = new File(path);
         if (his.exists()) {
-            List<String> lines = FileHandler.readFile(path);
+            List<String> lines = FileUtil.readFile(path);
             for (String line : lines) {
                 EXPLORED.add(Integer.valueOf(line.trim()));
             }
@@ -65,11 +65,11 @@ public class InflattedVerbIndexer {
             JsonProcessor processor = new JsonProcessor(new File(path));
             Document document = (Document) processor.convertToModel(Document.class);
 
-            String fileName = FileHandler.getFileNameFromPathString(path);
+            String fileName = FileUtil.getFileNameFromPathString(path);
             int docID = Integer.valueOf(RegexUtil.getFirstMatch(fileName, "[0-9]+"));
 
             if (!EXPLORED.contains(docID)) {
-                String article = StringTool.cleanPunctuation(document.getArticle());
+                String article = StringUtil.cleanPunctuation(document.getArticle());
                 tagger.setTEXT(article);
                 List<String> verbs = tagger.findVerbTaggedTokens();
 
@@ -77,7 +77,7 @@ public class InflattedVerbIndexer {
 
                 DAO.insertVerbsBatch(VERB_SET);
                 EXPLORED.add(docID);
-                FileHandler.appendFile(CORPUS_DIRECTORY + "expl.data", docID + "\n");
+                FileUtil.appendFile(CORPUS_DIRECTORY + "expl.data", docID + "\n");
 
                 int lastCount = DAO.countVerb();
                 Logger.print(doc++ + ": CONTRIBUTION  : " + (lastCount - initialCount));

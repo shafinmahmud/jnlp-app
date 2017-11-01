@@ -1,7 +1,7 @@
 package net.shafin.crawler.parser;
 
 import net.shafin.common.model.Document;
-import net.shafin.common.util.FileHandler;
+import net.shafin.common.util.FileUtil;
 import net.shafin.common.util.JsonProcessor;
 
 import java.io.IOException;
@@ -25,12 +25,12 @@ public class ParseController {
     public ParseController(String linksPath, String storagePath) {
         this.URL_LIST_FILE_PATH = linksPath;
         this.STORAGE_FOLDER_PATH = storagePath;
-        this.urlList = FileHandler.readFile(URL_LIST_FILE_PATH);
-        this.exploredURLs = FileHandler.readFileOrCreateIfNotExists(STORAGE_FOLDER_PATH + "explored.db");
-        this.skippedURLs = FileHandler.readFileOrCreateIfNotExists(STORAGE_FOLDER_PATH + "skipped.db");
+        this.urlList = FileUtil.readFile(URL_LIST_FILE_PATH);
+        this.exploredURLs = FileUtil.readFileOrCreateIfNotExists(STORAGE_FOLDER_PATH + "explored.db");
+        this.skippedURLs = FileUtil.readFileOrCreateIfNotExists(STORAGE_FOLDER_PATH + "skipped.db");
 
-        FileHandler.deleteFile(STORAGE_FOLDER_PATH + "error.db");
-        this.errorURLs = FileHandler.readFileOrCreateIfNotExists(STORAGE_FOLDER_PATH + "error.db");
+        FileUtil.deleteFile(STORAGE_FOLDER_PATH + "error.db");
+        this.errorURLs = FileUtil.readFileOrCreateIfNotExists(STORAGE_FOLDER_PATH + "error.db");
     }
 
     public void parseAndStoreAsTxt() {
@@ -41,18 +41,18 @@ public class ParseController {
                     Document doc = parseDocument(url);
 
                     if (doc != null) {
-                        FileHandler.writeFile(STORAGE_FOLDER_PATH + counter + ". " + doc.getTitle() + ".txt",
+                        FileUtil.writeFile(STORAGE_FOLDER_PATH + counter + ". " + doc.getTitle() + ".txt",
                                 doc.toString());
-                        FileHandler.appendFile(STORAGE_FOLDER_PATH + "explored.db", url + "\n");
+                        FileUtil.appendFile(STORAGE_FOLDER_PATH + "explored.db", url + "\n");
                         System.out.println(counter + ": WRITTEN: " + url);
                     } else {
-                        FileHandler.appendFile(STORAGE_FOLDER_PATH + "skipped.db", url + "\n");
+                        FileUtil.appendFile(STORAGE_FOLDER_PATH + "skipped.db", url + "\n");
                         System.out.println(counter + ": SKIPPED: " + url);
                     }
                 } catch (NullPointerException | IOException e) {
                     e.printStackTrace();
                     System.out.println(counter + ": ERROR: " + url);
-                    FileHandler.appendFile(STORAGE_FOLDER_PATH + "error.db", url + "\n");
+                    FileUtil.appendFile(STORAGE_FOLDER_PATH + "error.db", url + "\n");
                 }
             }
             counter++;
@@ -68,18 +68,18 @@ public class ParseController {
                     if (doc != null) {
                         JsonProcessor jsonProcessor = new JsonProcessor();
                         String jsonString = jsonProcessor.convertToJson(doc);
-                        FileHandler.writeFile(STORAGE_FOLDER_PATH + counter++ + ". " + doc.getTitle() + ".json",
+                        FileUtil.writeFile(STORAGE_FOLDER_PATH + counter++ + ". " + doc.getTitle() + ".json",
                                 jsonString);
-                        FileHandler.appendFile(STORAGE_FOLDER_PATH + "explored.db", url + "\n");
+                        FileUtil.appendFile(STORAGE_FOLDER_PATH + "explored.db", url + "\n");
                         System.out.println(counter + ": WRITTEN: " + url);
                     } else {
-                        FileHandler.appendFile(STORAGE_FOLDER_PATH + "skipped.db", url + "\n");
+                        FileUtil.appendFile(STORAGE_FOLDER_PATH + "skipped.db", url + "\n");
                         System.out.println(counter + ": SKIPPED: " + url);
                     }
                 } catch (NullPointerException | IOException e) {
                     e.printStackTrace();
                     System.out.println(counter + ": ERROR: " + url);
-                    FileHandler.appendFile(STORAGE_FOLDER_PATH + "error.db", url + "\n");
+                    FileUtil.appendFile(STORAGE_FOLDER_PATH + "error.db", url + "\n");
                 }
             }
             counter++;

@@ -1,2 +1,1 @@
-include 'crawler', 'common'
-include 'nlp'
+include 'crawler', 'common', 'nlp', 'api'

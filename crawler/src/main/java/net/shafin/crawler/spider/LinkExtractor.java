@@ -1,6 +1,7 @@
 package net.shafin.crawler.spider;
 
 import net.shafin.common.util.RegexUtil;
+import net.shafin.crawler.model.DomainSetup;
 import net.shafin.crawler.util.JsoupParser;
 import org.jsoup.Connection.Response;
 import org.jsoup.nodes.Element;
@@ -22,10 +23,10 @@ public class LinkExtractor {
     private final List<String> EXCLUDE_STRINGS;
     private String URL;
 
-    public LinkExtractor(SpiderConfig config) {
-        this.DOMAIN_FILTER = config.getDOMAIN_FILTER_PATTERN();
-        this.DOMAIN = config.getROOT_DOMAIN();
-        this.EXCLUDE_STRINGS = config.getEXCLUDE_STRINGS();
+    public LinkExtractor(DomainSetup config) {
+        this.DOMAIN_FILTER = config.getAcceptingSubDomainPattern();
+        this.DOMAIN = config.getRoot();
+        this.EXCLUDE_STRINGS = config.getExcludingDomainTerms();
     }
 
     public String getURL() {

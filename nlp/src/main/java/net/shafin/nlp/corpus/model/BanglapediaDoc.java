@@ -43,9 +43,6 @@ public class BanglapediaDoc implements Serializable {
     @JsonProperty("article")
     private String article;
 
-    public BanglapediaDoc() {
-    }
-
     public int getDocID() {
         return docID;
     }
@@ -125,6 +122,4 @@ public class BanglapediaDoc implements Serializable {
     public void setArticle(String article) {
         this.article = article;
     }
-
-
 }

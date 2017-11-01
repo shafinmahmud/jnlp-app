@@ -1,6 +1,6 @@
 package net.shafin.crawler.util;
 
-import net.shafin.common.util.FileHandler;
+import net.shafin.common.util.FileUtil;
 import org.jsoup.nodes.Element;
 
 import java.io.IOException;
@@ -11,7 +11,7 @@ import java.util.List;
  * @author Shafin Mahmud
  * @since 10/2/2016
  */
-public class DictionaryScrabber {
+public class DictionaryScrapper {
 
     public static void main(String[] args) throws MalformedURLException, IOException {
 
@@ -19,7 +19,7 @@ public class DictionaryScrabber {
         String en_path = "D:/corncob_EN.txt";
         String bn_path = "D:/corncob_BN.txt";
 
-        List<String> lines = FileHandler.readFile(file_path);
+        List<String> lines = FileUtil.readFile(file_path);
         String URL = "http://www.english-bangla.com/dictionary/";
 
         JsoupParser jsoupParser = new JsoupParser();
@@ -32,8 +32,8 @@ public class DictionaryScrabber {
                 String html = jsoupParser.getHtmlFromGetRequest(URL + line);
                 Element meaning = jsoupParser.parseElementByFirstFromHtml(html, "#w_info > span.format1");
 
-                FileHandler.appendFile(en_path, line + "\n");
-                FileHandler.appendFile(bn_path, meaning.text() + "\n");
+                FileUtil.appendFile(en_path, line + "\n");
+                FileUtil.appendFile(bn_path, meaning.text() + "\n");
 
                 System.out.println(meaning.text());
             } catch (NullPointerException e) {

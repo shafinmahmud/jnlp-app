@@ -4,7 +4,7 @@ import net.shafin.common.model.Document;
 import net.shafin.common.util.JsonProcessor;
 import net.shafin.common.util.Logger;
 import net.shafin.common.util.ReflectionUtil;
-import net.shafin.common.util.FileHandler;
+import net.shafin.common.util.FileUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,10 +35,10 @@ public class TextToJsonDocument<T> {
     }
 
     public void process() throws InstantiationException, IllegalAccessException, IOException {
-        List<String> filePaths = FileHandler.getRecursiveFileList(TEXT_FILES_DIRECTORY);
+        List<String> filePaths = FileUtil.getRecursiveFileList(TEXT_FILES_DIRECTORY);
 
         for (String path : filePaths) {
-            String fileName = FileHandler.getFileNameFromPathString(path);
+            String fileName = FileUtil.getFileNameFromPathString(path);
 
             if (path.endsWith(".txt")) {
                 T document = mapTextToObject(path);
@@ -48,7 +48,7 @@ public class TextToJsonDocument<T> {
 
                 String filePath = JSON_FILES_DIRECTORY + "/" + fileName + ".json";
                 if (!new File(filePath).exists()) {
-                    FileHandler.writeFile(filePath, json);
+                    FileUtil.writeFile(filePath, json);
                     Logger.print("CONVERTED : " + filePath);
                 } else {
                     Logger.print("EXISTS : " + filePath);
@@ -59,7 +59,7 @@ public class TextToJsonDocument<T> {
     }
 
     private T mapTextToObject(final String txtFilePath) throws InstantiationException, IllegalAccessException {
-        List<String> lines = FileHandler.readFile(txtFilePath);
+        List<String> lines = FileUtil.readFile(txtFilePath);
         Field[] fields = DOCUMENT_CLASS.getDeclaredFields();
         T document = (T) DOCUMENT_CLASS.newInstance();
 

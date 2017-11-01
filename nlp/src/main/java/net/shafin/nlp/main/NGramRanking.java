@@ -44,6 +44,7 @@ public class NGramRanking {
             if (count > KP_NUMBER) {
                 break;
             }
+
             output.put(entry.getKey(), entry.getValue());
             count++;
         }
@@ -102,7 +103,7 @@ public class NGramRanking {
                 break;
         }
 
-        vector = MapUtil.sortByValueDecending(vector);
+        vector = MapUtil.sortByValueDescending(vector);
 
         Map<String, TermValue> sortedTermValue = new LinkedHashMap<>();
         for (Map.Entry<String, Double> entry : vector.entrySet()) {
@@ -124,6 +125,8 @@ public class NGramRanking {
     }
 
     public static void main(String[] args) throws IOException {
+        AppBootProcess.init();
+
         NGramRanking ranking = new NGramRanking(RankingApproach.COMBINED, 10);
         Map<String, TermValue> map = ranking.generateAutomatedKP(94);
         for (Map.Entry<String, TermValue> entry : map.entrySet()) {

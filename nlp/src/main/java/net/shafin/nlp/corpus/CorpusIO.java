@@ -1,6 +1,6 @@
 package net.shafin.nlp.corpus;
 
-import net.shafin.common.util.FileHandler;
+import net.shafin.common.util.FileUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,25 +15,26 @@ import java.util.List;
 public class CorpusIO {
 
     private final String CORPUS_DIRECTORY;
-    private final boolean RECURCIVE_FILES;
+    private final boolean RECURSIVE_FILES;
 
     private final String EXTENSION;
 
-    public CorpusIO(String dir, String ext, boolean isRecurcive) {
+    public CorpusIO(String dir, String ext, boolean isRecursive) {
         if (!new File(dir).isDirectory()) {
             throw new IllegalArgumentException("This is not a Directory!");
         }
+
         this.CORPUS_DIRECTORY = dir;
-        this.RECURCIVE_FILES = isRecurcive;
+        this.RECURSIVE_FILES = isRecursive;
         this.EXTENSION = ext;
     }
 
     public Iterator<String> getDocumentPaths() throws IOException {
         List<String> paths = null;
-        if (RECURCIVE_FILES) {
-            paths = FileHandler.getRecursiveFileList(CORPUS_DIRECTORY);
+        if (RECURSIVE_FILES) {
+            paths = FileUtil.getRecursiveFileList(CORPUS_DIRECTORY);
         } else {
-            paths = FileHandler.getFileList(CORPUS_DIRECTORY);
+            paths = FileUtil.getFileList(CORPUS_DIRECTORY);
         }
 
         List<String> valids = new ArrayList<>();

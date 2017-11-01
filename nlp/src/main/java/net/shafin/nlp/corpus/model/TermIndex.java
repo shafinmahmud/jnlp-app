@@ -14,6 +14,7 @@ public class TermIndex implements Comparable<TermIndex> {
 
     private final int docId;
     private String term;
+
     private int tf;
     private int df;
     private double ps;
@@ -97,6 +98,7 @@ public class TermIndex implements Comparable<TermIndex> {
         if (scoreO == scoreT) {
             return 0;
         }
+
         return scoreT > scoreO ? -1 : 1;
     }
 }

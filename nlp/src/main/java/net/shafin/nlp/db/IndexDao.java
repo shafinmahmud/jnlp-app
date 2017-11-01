@@ -1,10 +1,6 @@
 package net.shafin.nlp.db;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -21,40 +17,11 @@ import net.shafin.common.util.Logger;
  */
 public class IndexDao extends BasicDao<TermIndex> {
 
-    public static File zeroFreqFile = new File(SQLiteDBConn.ZERO_FREQ_FILE);
-    public static File stopFilteredFile = new File(SQLiteDBConn.STOP_FILTERED_FILE);
-    public static File verbSuffxFilteredFile = new File(SQLiteDBConn.VERBSUFX_FILTERED_FILE);
-
     public IndexDao(SQLiteDBConn dbConn) {
         super(dbConn);
     }
 
     public void createTable() {
-
-        if (!zeroFreqFile.exists()) {
-            try {
-                zeroFreqFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        if (!stopFilteredFile.exists()) {
-            try {
-                stopFilteredFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        if (!verbSuffxFilteredFile.exists()) {
-            try {
-                verbSuffxFilteredFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
 		/* Creating the Query */
         StringBuilder SQL = new StringBuilder("CREATE TABLE term_index(");
         SQL.append("doc_id INT NOT NULL,").append(" ").append("term TEXT NOT NULL,").append(" ")
@@ -82,18 +49,6 @@ public class IndexDao extends BasicDao<TermIndex> {
     }
 
     public void deleteTable() {
-        if (zeroFreqFile.exists()) {
-            zeroFreqFile.delete();
-        }
-
-        if (stopFilteredFile.exists()) {
-            stopFilteredFile.delete();
-        }
-
-        if (verbSuffxFilteredFile.exists()) {
-            verbSuffxFilteredFile.delete();
-        }
-
 		/* Creating the Query */
         StringBuilder SQL = new StringBuilder("DROP TABLE IF EXISTS term_index");
         Logger.print(SQL.toString());
@@ -109,7 +64,6 @@ public class IndexDao extends BasicDao<TermIndex> {
         } finally {
             leaveGracefully();
         }
-
     }
 
     public boolean emptyTableTermIndex() {
@@ -645,25 +599,19 @@ public class IndexDao extends BasicDao<TermIndex> {
 
     }
 
-    public boolean insertAsDiscardedTerm(TermIndex index, File file) throws IOException {
-        // if file doesnt exists, then create it
-        if (!file.exists()) {
-            file.createNewFile();
-        }
+    public boolean insertAsDiscardedTerm(TermIndex index, File file) {
+        FileOutputStream fos = getFileOutputStream(file);
 
-        String textData = index.getDocId() + ": " + index.getTerm() + "\n";
-        FileOutputStream fileOutputStream = new FileOutputStream(file, true);
-
-        try (OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fileOutputStream, "UTF8")) {
+        try (OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fos, "UTF8")) {
+            String textData = index.getDocId() + ": " + index.getTerm() + "\n";
             textData = textData.replaceAll("\n", System.lineSeparator());
             outputStreamWriter.write(textData);
 
             return true;
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         return false;
     }
 
@@ -727,4 +675,23 @@ public class IndexDao extends BasicDao<TermIndex> {
         return false;
     }
 
+    private FileOutputStream getFileOutputStream(File file) {
+        // if file doesn't exists, then create it
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        FileOutputStream fileOutputStream = null;
+        try {
+            fileOutputStream = new FileOutputStream(file, true);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return fileOutputStream;
+    }
 }

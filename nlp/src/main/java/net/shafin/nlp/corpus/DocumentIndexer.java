@@ -56,7 +56,7 @@ public class DocumentIndexer {
 
     public void iterAndIndexDocuments() throws IOException {
         if (RECREATE_FLAG) {
-            indexService.recreatIndex();
+            indexService.recreateIndex();
         }
 
         indexDirectory(true, TRAIN_CORPUS_DIRECTORY, TRAIN_SET);
@@ -84,20 +84,20 @@ public class DocumentIndexer {
     public void indexDirectory(Boolean isTrain, String DIR, int number) throws IOException {
         int previous = isTrain ? 0 : 0;
         int counter = 1;
-        List<String> filePaths = FileHandler.getRecursiveFileList(DIR);
+        List<String> filePaths = FileUtil.getRecursiveFileList(DIR);
 
         for (String filePath : filePaths) {
             if (filePath.endsWith(EXTENSION)) {
 
                 if (counter > previous) {
-                    String fileName = FileHandler.getFileNameFromPathString(filePath);
+                    String fileName = FileUtil.getFileNameFromPathString(filePath);
                     int docID = Integer.valueOf(RegexUtil.getFirstMatch(fileName, "[0-9]+"));
 
                     Logger.print(counter + " : " + "INDEXING : " + filePath);
                     JsonProcessor jsonProcessor = new JsonProcessor(new File(filePath));
                     Document document = (Document) jsonProcessor.convertToModel(Document.class);
 
-                    String article = StringTool.cleanPunctuation(document.getArticle());
+                    String article = StringUtil.cleanPunctuation(document.getArticle());
                     LinkedList<String> SENTENCES = SentenceSpliter.getSentenceTokenListBn(article);
 
                     createIndex(isTrain, docID, article, SENTENCES);

@@ -3,8 +3,6 @@ package net.shafin.nlp.stemmer;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.shafin.common.util.FileHandler;
-
 /**
  * @author Shafin Mahmud
  * @since 10/2/2016
@@ -14,9 +12,9 @@ public class StemmerHelper {
     public static void main(String[] args) {
         //BnStemmerLight stemmerLight = new BnStemmerLight();
 //        BengaliStemmer bs = new BengaliStemmer("resources");
-//        List<String> words = FileHandler
+//        List<String> words = FileUtil
 //                .readFile("D:\\DOCUMENT\\GoogleDrive\\NLP\\KEYWORD\\PROJECT_WORK\\nlp\\words.txt");
-//        List<String> stopWords = FileHandler
+//        List<String> stopWords = FileUtil
 //                .readFile("D:\\DOCUMENT\\GoogleDrive\\NLP\\KEYWORD\\PROJECT_WORK\\nlp\\stopword.txt");
 //
 //        for (String s : words) {
@@ -24,7 +22,7 @@ public class StemmerHelper {
 //            if (!stopWords.contains(given)) {
 //                //String root = stemmerLight.stem(given);
 //                String root = bs.findRoot(given);
-//                //FileHandler.appendFile("D:\\DOCUMENT\\GoogleDrive\\NLP\\KEYWORD\\PROJECT_WORK\\nlp\\root_output.txt",
+//                //FileUtil.appendFile("D:\\DOCUMENT\\GoogleDrive\\NLP\\KEYWORD\\PROJECT_WORK\\nlp\\root_output.txt",
 //                //given + "  :  " + root + "\n");
 //                System.out.println(given + " : " + root);
 //            } else {

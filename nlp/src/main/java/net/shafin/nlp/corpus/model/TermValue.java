@@ -17,7 +17,7 @@ public class TermValue implements Comparable<TermValue> {
     private double idf;
     private double tf_idf;
     private double pfo;
-    private double combind;
+    private double combined;
     private double nounFreq;
     private boolean isManual;
 
@@ -34,7 +34,7 @@ public class TermValue implements Comparable<TermValue> {
         this.idf = Math.log((double) numDocs / (indexTerm.getDf() + 1)) + 1;
         this.pfo = (double) (1 / Math.sqrt(indexTerm.getPs()));
         this.tf_idf = tf * idf;
-        this.combind = this.tf_idf + this.pfo;
+        this.combined = this.tf_idf + this.pfo;
         this.isManual = indexTerm.isManual();
     }
 
@@ -87,11 +87,11 @@ public class TermValue implements Comparable<TermValue> {
     }
 
     public double getCombind() {
-        return combind;
+        return combined;
     }
 
     public void setCombind(double combind) {
-        this.combind = combind;
+        this.combined = combind;
     }
 
     public boolean isManual() {
@@ -152,7 +152,7 @@ public class TermValue implements Comparable<TermValue> {
 
     @Override
     public String toString() {
-        return this.pfo + " : " + tf_idf + " : " + combind;
+        return this.pfo + " : " + tf_idf + " : " + combined;
     }
 
     @Override
@@ -160,6 +160,7 @@ public class TermValue implements Comparable<TermValue> {
         if (this.probability == o.probability) {
             return 0;
         }
+
         return this.probability > o.probability ? -1 : 1;
     }
 }

@@ -51,22 +51,22 @@ public class DocumentQualifier {
         }
 
         this.EXISTING_FILE_NAMES = new ArrayList<>();
-        this.EXISTING_FILES = FileHandler.getRecursiveFileList(QUALIFIED_DOC_DIR_ROOT);
+        this.EXISTING_FILES = FileUtil.getRecursiveFileList(QUALIFIED_DOC_DIR_ROOT);
         for (String path : this.EXISTING_FILES) {
-            String name = FileHandler.getFileNameFromPathStringWithExt(path);
+            String name = FileUtil.getFileNameFromPathStringWithExt(path);
             this.EXISTING_FILE_NAMES.add(name);
         }
     }
 
     public void iterAndQualify() throws IOException {
-        List<String> filePaths = FileHandler.getRecursiveFileList(JSON_CORPUS_DIR);
+        List<String> filePaths = FileUtil.getRecursiveFileList(JSON_CORPUS_DIR);
         String CURRENT_DIR = QUALIFIED_DOC_DIR_ROOT;
 
         for (String filePath : filePaths) {
 
             if (filePath.endsWith(".json")) {
 
-                String fileName = FileHandler.getFileNameFromPathString(filePath);
+                String fileName = FileUtil.getFileNameFromPathString(filePath);
                 int docID = Integer.valueOf(RegexUtil.getFirstMatch(fileName, "[0-9]+"));
 
                 String intentedPath = CURRENT_DIR + fileName + ".json";
@@ -75,7 +75,7 @@ public class DocumentQualifier {
                     JsonProcessor jsonProcessor = new JsonProcessor(new File(filePath));
                     Document document = (Document) jsonProcessor.convertToModel(Document.class);
 
-                    String article = StringTool.cleanPunctuation(document.getArticle());
+                    String article = StringUtil.cleanPunctuation(document.getArticle());
                     LinkedList<String> SENTENCES = SentenceSpliter.getSentenceTokenListBn(article);
 
                     document = qualifyDocuemnt(document, SENTENCES);
@@ -84,7 +84,7 @@ public class DocumentQualifier {
                         document.setDocID(docID);
                         indexService.writeDocumentToDisk(document, intentedPath);
                         this.EXISTING_FILES.add(intentedPath);
-                        this.EXISTING_FILE_NAMES.add(FileHandler.getFileNameFromPathStringWithExt(intentedPath));
+                        this.EXISTING_FILE_NAMES.add(FileUtil.getFileNameFromPathStringWithExt(intentedPath));
                         Logger.print("WRITTEN : " + intentedPath);
                     } else {
                         Logger.print("DISQUALIFIED : " + filePath);
@@ -112,7 +112,7 @@ public class DocumentQualifier {
             FOLDERS.add(FOLDER);
         }
 
-        List<String> NON_EMPTY_FOLDERS = FileHandler.getRecursiveNoneEmptyChildFolders(QUALIFIED_DOC_DIR_ROOT);
+        List<String> NON_EMPTY_FOLDERS = FileUtil.getRecursiveNoneEmptyChildFolders(QUALIFIED_DOC_DIR_ROOT);
         if (!NON_EMPTY_FOLDERS.isEmpty()) {
             balanceFolderFiles(NON_EMPTY_FOLDERS);
         }
@@ -124,7 +124,7 @@ public class DocumentQualifier {
 
                 if (EXISTING_FILES.size() > 0) {
                     String file = EXISTING_FILES.get(EXISTING_FILES.size() - 1);
-                    if (FileHandler.moveFile(file, restOfFolder)) {
+                    if (FileUtil.moveFile(file, restOfFolder)) {
                         ListUtil.removeStringItem(file, EXISTING_FILES);
                         Logger.print("MOVED IN : " + file + " to " + restOfFolder);
                     }
@@ -136,7 +136,7 @@ public class DocumentQualifier {
 
     private void balanceFolderFiles(List<String> folders) throws IOException {
         for (String folder : folders) {
-            List<String> folderFiles = FileHandler.getRecursiveFileList(folder);
+            List<String> folderFiles = FileUtil.getRecursiveFileList(folder);
             int folderFileCount = folderFiles.size();
 
             for (String folderFile : folderFiles) {
@@ -150,7 +150,7 @@ public class DocumentQualifier {
 
                     if (EXISTING_FILES.size() > 0) {
                         String file = EXISTING_FILES.get(EXISTING_FILES.size() - 1);
-                        if (FileHandler.moveFile(file, folder)) {
+                        if (FileUtil.moveFile(file, folder)) {
                             ListUtil.removeStringItem(file, EXISTING_FILES);
                             Logger.print("MOVED IN : " + file + " to " + folder);
                         }
@@ -164,7 +164,7 @@ public class DocumentQualifier {
 
                     if (EXISTING_FILES.size() > 0) {
                         String file = folderFiles.get(folderFiles.size() - 1);
-                        if (FileHandler.moveFile(file, QUALIFIED_DOC_DIR_ROOT)) {
+                        if (FileUtil.moveFile(file, QUALIFIED_DOC_DIR_ROOT)) {
                             Logger.print("MOVED OUT : " + file + " to " + QUALIFIED_DOC_DIR_ROOT);
                         }
                     }

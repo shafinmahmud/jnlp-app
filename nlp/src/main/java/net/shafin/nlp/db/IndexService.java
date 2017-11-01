@@ -2,8 +2,10 @@ package net.shafin.nlp.db;
 
 import net.shafin.common.model.Document;
 import net.shafin.nlp.corpus.model.TermIndex;
-import net.shafin.common.util.FileHandler;
+import net.shafin.common.util.FileUtil;
+import net.shafin.nlp.main.AppBootProcess;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +26,7 @@ public class IndexService {
         this.nounsDao = new NounsDao(SQLiteDBConn.getSQLiteDBConn());
     }
 
-    public void recreatIndex() {
+    public void recreateIndex() {
         dao.deleteTable();
         dao.createTable();
     }
@@ -139,35 +141,20 @@ public class IndexService {
     }
 
     public boolean enlistAsZeroFreqTerm(TermIndex index) {
-        try {
-            return dao.insertAsDiscardedTerm(index, IndexDao.zeroFreqFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
+        return dao.insertAsDiscardedTerm(index, new File(AppBootProcess.ZERO_FREQ_FILE));
     }
 
     public boolean enlistAsStopWordContainedTerm(TermIndex index) {
-        try {
-            return dao.insertAsDiscardedTerm(index, IndexDao.stopFilteredFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
+        return dao.insertAsDiscardedTerm(index, new File(AppBootProcess.STOP_FILTERED_FILE));
     }
 
     public boolean enlistAsVerbSuffixedTerm(TermIndex index) {
-        try {
-            return dao.insertAsDiscardedTerm(index, IndexDao.verbSuffxFilteredFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
+        return dao.insertAsDiscardedTerm(index, new File(AppBootProcess.VERB_SUFFIX_FILTERED_FILE));
     }
 
     public boolean writeDocumentToDisk(Document document, String fileURI) {
         try {
-            return FileHandler.writeFile(fileURI, document.toJsonString());
+            return FileUtil.writeFile(fileURI, document.toJsonString());
         } catch (IOException e) {
             e.printStackTrace();
         }

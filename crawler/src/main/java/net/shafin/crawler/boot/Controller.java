@@ -1,4 +1,4 @@
-package net.shafin.crawler.home;
+package net.shafin.crawler.boot;
 
 import net.shafin.crawler.parser.ParseController;
 

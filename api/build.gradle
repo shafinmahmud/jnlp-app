@@ -1,0 +1,5 @@
+description='Keyphrase Extraction API'
+
+dependencies {
+    compile project(':common')
+}

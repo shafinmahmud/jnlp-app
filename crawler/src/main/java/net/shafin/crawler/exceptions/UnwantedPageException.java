@@ -15,9 +15,4 @@ public class UnwantedPageException extends RuntimeException {
     public UnwantedPageException(Throwable cause) {
         super(cause);
     }
-
-    public UnwantedPageException(String message, Throwable cause, boolean enableSuppression,
-                                 boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

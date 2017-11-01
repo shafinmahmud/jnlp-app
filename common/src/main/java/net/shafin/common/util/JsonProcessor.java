@@ -17,7 +17,7 @@ public class JsonProcessor {
 
     private String JSON;
 
-    public JsonProcessor(){
+    public JsonProcessor() {
     }
 
     public JsonProcessor(String json) {
@@ -79,13 +79,5 @@ public class JsonProcessor {
     public <T> Object convertToModel(Class<T> clazz) throws JsonParseException, JsonMappingException, IOException {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(this.JSON, clazz);
-    }
-
-    public static void main(String[] args) throws IOException {
-        // File file = new File("D:\\DOCUMENT\\BP\\পাঁচালি.json");
-        // JsonProcessor jsonProcessor = new JsonProcessor(file);
-        //// BanglapediaDoc doc = (BanglapediaDoc)
-        // jsonProcessor.convertToModel(BanglapediaDoc.class);
-        // System.out.println(doc.getDocID());
     }
 }
