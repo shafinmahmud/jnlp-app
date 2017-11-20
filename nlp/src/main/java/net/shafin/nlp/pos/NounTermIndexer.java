@@ -4,7 +4,6 @@ import net.shafin.common.model.Document;
 import net.shafin.common.util.*;
 import net.shafin.nlp.corpus.CorpusIO;
 import net.shafin.nlp.db.NounsDao;
-import net.shafin.nlp.db.SQLiteDBConn;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,7 +26,7 @@ public class NounTermIndexer {
     private final PosTagger tagger;
 
     public NounTermIndexer(String dir) throws ClassNotFoundException, IOException {
-        this.DAO = new NounsDao(SQLiteDBConn.getSQLiteDBConn());
+        this.DAO = new NounsDao(SQLiteDBHandler.getSQLiteDBConn());
         this.CORPUS_DIRECTORY = dir;
         this.EXPLORED = new HashSet<>();
 

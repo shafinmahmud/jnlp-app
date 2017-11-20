@@ -73,7 +73,7 @@ public class DocumentIndexer {
 		merged.addAll(testIndex);
 
 		Logger.print("DELETING INDEXES...");
-		indexService.emptyTableTermIndex();
+		indexService.truncateTermIndex();
 
 		Logger.print("RE-INSERTING INDEXES...");
 		indexService.batchInsertIndex(merged);*/

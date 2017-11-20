@@ -5,12 +5,15 @@ import org.codehaus.jackson.map.JsonMappingException;
 import net.shafin.common.util.JsonProcessor;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 /**
  * @author Shafin Mahmud
  * @since 10/2/2016
  */
-public class TermIndex implements Comparable<TermIndex> {
+public class TermIndex implements Comparable<TermIndex>, Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final int docId;
     private String term;

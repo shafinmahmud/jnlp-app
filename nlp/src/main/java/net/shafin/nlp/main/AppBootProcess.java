@@ -1,10 +1,11 @@
 package net.shafin.nlp.main;
 
+import net.shafin.common.db.DataSource;
 import net.shafin.common.util.FileUtil;
-import net.shafin.nlp.db.SQLiteDBConn;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 /**
  * @author Shafin Mahmud
@@ -12,17 +13,20 @@ import java.io.IOException;
  */
 public class AppBootProcess {
 
-    private static final String DATA_DIR = "_data/";
-    private static final String INDEX_DIR = DATA_DIR + "_index/";
+    public static DataSource dataSource;
 
-    public static final String DB_SCHEMA_PATH = DATA_DIR + "db.sqlite";
+    private static final String INDEX_DIR = "_data/_index/";
     public static final String ZERO_FREQ_FILE = INDEX_DIR + "zero_freq_terms.txt";
     public static final String STOP_FILTERED_FILE = INDEX_DIR + "stop_filtered_terms.txt";
     public static final String VERB_SUFFIX_FILTERED_FILE = INDEX_DIR + "verb_suffix_filtered_terms.txt";
 
     public static void init() {
-        //initialize database
-        SQLiteDBConn.initializeDB(DB_SCHEMA_PATH);
+
+        try {
+            dataSource = new DataSource("db.properties");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         //initialize required files
         FileUtil.createFileIfNotExist(ZERO_FREQ_FILE);

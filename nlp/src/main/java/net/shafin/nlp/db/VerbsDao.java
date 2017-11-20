@@ -12,7 +12,7 @@ import java.util.Set;
  */
 public class VerbsDao extends BasicDao<TermIndex> {
 
-    public VerbsDao(SQLiteDBConn dbConn) {
+    public VerbsDao(SQLiteDBHandler dbConn) {
         super(dbConn);
     }
 
@@ -26,8 +26,8 @@ public class VerbsDao extends BasicDao<TermIndex> {
 		/* Executing the Query */
         try {
             String query = SQL.toString();
-            this.qs = DB_CONN.getConnection().prepareStatement(query);
-            this.DB_CONN.executeQuery(this.qs);
+            this.ps = dbHandler.getConnection().prepareStatement(query);
+            this.dbHandler.executeQuery(this.ps);
 
         } catch (IllegalStateException | SQLException e) {
             e.printStackTrace();
@@ -44,8 +44,8 @@ public class VerbsDao extends BasicDao<TermIndex> {
 		/* Executing the Query */
         try {
             String query = SQL.toString();
-            this.qs = DB_CONN.getConnection().prepareStatement(query);
-            this.DB_CONN.executeQuery(this.qs);
+            this.ps = dbHandler.getConnection().prepareStatement(query);
+            this.dbHandler.executeQuery(this.ps);
 
         } catch (IllegalStateException | SQLException e) {
             e.printStackTrace();
@@ -57,8 +57,8 @@ public class VerbsDao extends BasicDao<TermIndex> {
     public boolean emptyTableTermIndex() {
         try {
             String query = "DELETE FROM verb;";
-            this.qs = DB_CONN.getConnection().prepareStatement(query);
-            this.DB_CONN.executeQuery(this.qs);
+            this.ps = dbHandler.getConnection().prepareStatement(query);
+            this.dbHandler.executeQuery(this.ps);
 
             return true;
         } catch (IllegalStateException | SQLException e) {
@@ -72,10 +72,10 @@ public class VerbsDao extends BasicDao<TermIndex> {
     public boolean isExists(String verb) {
         try {
             String query = "SELECT * FROM verb where v = ?";
-            this.qs = DB_CONN.getConnection().prepareStatement(query);
-            this.qs.setString(1, verb);
+            this.ps = dbHandler.getConnection().prepareStatement(query);
+            this.ps.setString(1, verb);
 
-            this.rs = this.DB_CONN.retriveResultset(this.qs);
+            this.rs = this.dbHandler.retriveResultset(this.ps);
             if (rs.next()) {
                 return true;
             }
@@ -90,9 +90,9 @@ public class VerbsDao extends BasicDao<TermIndex> {
     public int countVerb() {
         try {
             String query = "SELECT count(*) as total FROM verb";
-            this.qs = DB_CONN.getConnection().prepareStatement(query);
+            this.ps = dbHandler.getConnection().prepareStatement(query);
 
-            this.rs = this.DB_CONN.retriveResultset(this.qs);
+            this.rs = this.dbHandler.retriveResultset(this.ps);
             if (rs.next()) {
                 return rs.getInt("total");
             }
@@ -106,27 +106,27 @@ public class VerbsDao extends BasicDao<TermIndex> {
 
     public boolean insertVerbsBatch(Set<String> verbs) {
         try {
-            DB_CONN.getConnection().setAutoCommit(false);
+            dbHandler.getConnection().setAutoCommit(false);
 
             String query = "INSERT OR IGNORE INTO verb(v) VALUES (?)";
-            this.qs = DB_CONN.getConnection().prepareStatement(query.toString());
+            this.ps = dbHandler.getConnection().prepareStatement(query.toString());
 
             final int batchSize = 20000;
             int count = 0;
 
             for (String v : verbs) {
-                this.qs.setString(1, v);
-                this.qs.addBatch();
+                this.ps.setString(1, v);
+                this.ps.addBatch();
 
                 if (++count % batchSize == 0) {
-                    this.qs.executeBatch();
-                    this.DB_CONN.getConnection().commit();
+                    this.ps.executeBatch();
+                    this.dbHandler.getConnection().commit();
                 }
             }
 
-            this.qs.executeBatch();
-            this.DB_CONN.getConnection().commit();
-            DB_CONN.getConnection().setAutoCommit(true);
+            this.ps.executeBatch();
+            this.dbHandler.getConnection().commit();
+            dbHandler.getConnection().setAutoCommit(true);
 
             return true;
 

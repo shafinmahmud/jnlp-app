@@ -1,5 +1,6 @@
 package net.shafin.nlp.corpus.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -8,7 +9,9 @@ import java.util.List;
  * @author Shafin Mahmud
  * @since 10/2/2016
  */
-public class TermValue implements Comparable<TermValue> {
+public class TermValue implements Comparable<TermValue>, Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private int docId;
     private String term;

@@ -3,7 +3,6 @@ package net.shafin.nlp.pos;
 import net.shafin.common.util.*;
 import net.shafin.nlp.corpus.CorpusIO;
 import net.shafin.common.model.Document;
-import net.shafin.nlp.db.SQLiteDBConn;
 import net.shafin.nlp.db.VerbsDao;
 
 import java.io.File;
@@ -28,7 +27,7 @@ public class InflattedVerbIndexer {
     private final PosTagger tagger;
 
     public InflattedVerbIndexer(String dir) throws ClassNotFoundException, IOException {
-        this.DAO = new VerbsDao(SQLiteDBConn.getSQLiteDBConn());
+        this.DAO = new VerbsDao(SQLiteDBHandler.getSQLiteDBConn());
         this.CORPUS_DIRECTORY = dir;
         this.EXPLORED = new HashSet<>();
 

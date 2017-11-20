@@ -21,9 +21,9 @@ public class IndexService {
     private final NounsDao nounsDao;
 
     public IndexService() {
-        this.dao = new IndexDao(SQLiteDBConn.getSQLiteDBConn());
-        this.verbsDao = new VerbsDao(SQLiteDBConn.getSQLiteDBConn());
-        this.nounsDao = new NounsDao(SQLiteDBConn.getSQLiteDBConn());
+        this.dao = new IndexDao(SQLiteDBHandler.getSQLiteDBConn());
+        this.verbsDao = new VerbsDao(SQLiteDBHandler.getSQLiteDBConn());
+        this.nounsDao = new NounsDao(SQLiteDBHandler.getSQLiteDBConn());
     }
 
     public void recreateIndex() {
@@ -32,7 +32,7 @@ public class IndexService {
     }
 
     public boolean emptyTableTermIndex() {
-        return dao.emptyTableTermIndex();
+        return dao.truncateTermIndex();
     }
 
     public boolean isExistVerb(String verb) {
